@@ -2,26 +2,22 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-
-  reactStrictMode: true,
-
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  // ❌ Removed turbopack alias (can break production routing)
-  webpack: (config) => {
-    config.resolve.fallback = {
-      fs: false,
-      path: false,
-      crypto: false,
-      stream: false,
-      util: false,
-      buffer: false,
-      module: false,
-    };
-
-    return config;
+  reactStrictMode: false,
+  // Next.js 16 uses Turbopack by default.
+  // Redirect Node.js-only modules to empty modules for browser bundles.
+  turbopack: {
+    resolveAlias: {
+      crypto: { browser: './src/lib/empty-module.js' },
+      module: { browser: './src/lib/empty-module.js' },
+      fs: { browser: './src/lib/empty-module.js' },
+      path: { browser: './src/lib/empty-module.js' },
+      stream: { browser: './src/lib/empty-module.js' },
+      util: { browser: './src/lib/empty-module.js' },
+      buffer: { browser: './src/lib/empty-module.js' },
+    },
   },
 };
 

@@ -12,7 +12,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-colors">
+      <button className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 transition-colors">
         <Sun size={16} className="text-muted-foreground" />
       </button>
     );
@@ -24,20 +24,20 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all duration-300 hover:bg-accent/10 hover:border-accent/30"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 transition-all duration-300 hover:bg-muted hover:border-brand/30"
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
-      <div className="relative h-4 w-4">
+      <div className="relative h-4 w-4 overflow-hidden">
         <Sun
           size={16}
-          className={`absolute inset-0 text-amber-500 transition-all duration-300 ${
-            isDark ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'
+          className={`absolute inset-0 text-amber-500 transition-all duration-500 ${
+            isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
           }`}
         />
         <Moon
           size={16}
-          className={`absolute inset-0 text-brand transition-all duration-300 ${
-            isDark ? '-rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
+          className={`absolute inset-0 text-brand transition-all duration-500 ${
+            isDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
           }`}
         />
       </div>

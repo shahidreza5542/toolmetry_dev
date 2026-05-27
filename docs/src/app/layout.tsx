@@ -9,19 +9,26 @@ import { Footer } from "@/app/components/Footer";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Toolmetry Developer Web - Documentation & Playground",
-  description: "Comprehensive documentation and interactive playground for the toolmetry npm package. 18 modules of essential developer tools for JavaScript and TypeScript.",
-  keywords: ["toolmetry", "developer tools", "base64", "hash", "JWT", "UUID", "npm package", "TypeScript", "JavaScript", "encrypt", "random"],
+  title: "Toolmetry — 18 Developer Tools, Zero Dependencies",
+  description: "Comprehensive developer tools library for JavaScript and TypeScript. 18 essential modules including Base64, Hash, JWT, UUID, Encrypt, and more. Zero dependencies, full TypeScript, Node + Browser.",
+  keywords: ["toolmetry", "developer tools", "base64", "hash", "JWT", "UUID", "npm package", "TypeScript", "JavaScript", "encrypt", "random", "password", "morse", "color converter"],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+  },
+  openGraph: {
+    title: "Toolmetry — 18 Developer Tools, Zero Dependencies",
+    description: "Comprehensive developer tools library for JavaScript and TypeScript. 18 essential modules, zero dependencies, full TypeScript support.",
+    type: "website",
   },
 };
 

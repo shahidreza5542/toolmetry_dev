@@ -113,7 +113,6 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
         // ── Hash (toolmetry.hashAsync / hashAll) ────────────────────────
         case 'hash': {
           if (mode === 'all') {
-            // hashAll() is sync and needs Node crypto, so use hashAsync for each
             const [sha1, sha256, sha384, sha512] = await Promise.all([
               hashAsync(input, 'SHA-1'),
               hashAsync(input, 'SHA-256'),
@@ -377,16 +376,16 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
-      {/* Header — clearly shows this uses real package imports */}
-      <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center gap-2">
+      {/* Header with gradient left border */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30 relative before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:gradient-bg before:rounded-r">
         <Play size={14} className="text-brand" />
         <h3 className="text-sm font-semibold text-card-foreground">Try It Live</h3>
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono text-brand bg-brand/10 dark:bg-brand/20 rounded-full px-2 py-0.5">
-          <Package size={9} /> import {'{'} ... {'}'} from &apos;toolmetry&apos;
+        <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-mono text-brand bg-brand/10 dark:bg-brand/15 rounded-full px-2.5 py-1 font-medium">
+          <Package size={10} /> import {'{'} ... {'}'} from &apos;toolmetry&apos;
         </span>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3.5">
         {/* Mode buttons */}
         {modes.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -394,10 +393,10 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
               <button
                 key={m.value}
                 onClick={() => { setMode(m.value); setOutput(''); }}
-                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                   (mode || modes[0].value) === m.value
-                    ? 'gradient-bg text-white shadow-sm'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    ? 'gradient-bg text-white shadow-sm shadow-brand/20'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                 }`}
               >
                 {m.label}
@@ -409,9 +408,9 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
         {/* Input */}
         {toolSlug !== 'uuid' && (
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Input</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Input</label>
             <textarea
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50 resize-y min-h-[80px] text-foreground"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/30 resize-y min-h-[80px] text-foreground placeholder:text-muted-foreground/50"
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder={getPlaceholder()}
@@ -423,10 +422,10 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
         {/* Secret key for encrypt */}
         {toolSlug === 'encrypt' && (
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Secret Key</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Secret Key</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50 text-foreground"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/30 text-foreground placeholder:text-muted-foreground/50"
               value={secret}
               onChange={e => setSecret(e.target.value)}
               placeholder="my-password"
@@ -438,7 +437,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
         <button
           onClick={runTool}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg gradient-bg px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand/20 transition-all hover:shadow-lg hover:shadow-brand/30 active:scale-95 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg gradient-bg px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/20 transition-all hover:shadow-lg hover:shadow-brand/30 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
           {toolSlug === 'uuid' ? 'Generate UUID' : 'Run'}
@@ -446,20 +445,20 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
 
         {/* Output */}
         {output && (
-          <div>
-            <div className="flex items-center justify-between mb-1">
+          <div className="relative">
+            <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-muted-foreground">
                 Output <span className="text-brand/60 font-mono text-[10px]">via toolmetry</span>
               </label>
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:bg-brand/10 rounded px-1.5 py-0.5 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md px-1.5 py-0.5 hover:bg-muted transition-colors"
               >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
                 {copied ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <pre className="w-full rounded-lg border border-border bg-code-bg px-3 py-2 text-sm font-mono break-all whitespace-pre-wrap max-h-64 overflow-y-auto text-foreground custom-scrollbar">
+            <pre className="w-full rounded-lg border border-slate-800 bg-[#0B1120] px-3 py-2.5 text-sm font-mono break-all whitespace-pre-wrap max-h-64 overflow-y-auto text-slate-300 custom-scrollbar">
               {output}
             </pre>
           </div>
