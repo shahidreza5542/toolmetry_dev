@@ -1,6 +1,9 @@
 /**
- * toolmetryai — URL Encode / Decode
+ * toolmetry — URL Encode / Decode
+ * @module url
  */
+
+'use strict';
 
 /**
  * Encode a string for use in URL query parameters.
@@ -28,7 +31,6 @@ function decode(input) {
 
 /**
  * Encode all characters (including unreserved ones like A-Z, 0-9).
- * Useful for maximum encoding.
  * @param {string} input - The string to fully encode.
  * @returns {string} Fully encoded string.
  */
@@ -37,7 +39,7 @@ function encodeAll(input) {
     throw new TypeError('Input must be a string');
   }
   return Array.from(input)
-    .map(ch => '%' + ch.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase())
+    .map(function(ch) { return '%' + ch.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase(); })
     .join('');
 }
 
@@ -50,9 +52,9 @@ function buildQuery(params) {
   if (!params || typeof params !== 'object') {
     throw new TypeError('Input must be an object');
   }
-  const entries = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
+  var entries = Object.entries(params)
+    .filter(function(entry) { return entry[1] !== undefined && entry[1] !== null; })
+    .map(function(entry) { return encodeURIComponent(entry[0]) + '=' + encodeURIComponent(String(entry[1])); });
   return entries.length > 0 ? '?' + entries.join('&') : '';
 }
 
@@ -65,16 +67,18 @@ function parseQuery(qs) {
   if (typeof qs !== 'string') {
     throw new TypeError('Input must be a string');
   }
-  const str = qs.startsWith('?') ? qs.slice(1) : qs;
+  var str = qs.startsWith('?') ? qs.slice(1) : qs;
   if (!str) return {};
-  const params = {};
-  str.split('&').forEach(pair => {
-    const [key, ...rest] = pair.split('=');
+  var params = {};
+  str.split('&').forEach(function(pair) {
+    var parts = pair.split('=');
+    var key = parts[0];
+    var rest = parts.slice(1).join('=');
     if (key) {
-      params[decodeURIComponent(key)] = decodeURIComponent(rest.join('='));
+      params[decodeURIComponent(key)] = decodeURIComponent(rest);
     }
   });
   return params;
 }
 
-module.exports = { encode, decode, encodeAll, buildQuery, parseQuery };
+module.exports = { encode: encode, decode: decode, encodeAll: encodeAll, buildQuery: buildQuery, parseQuery: parseQuery };

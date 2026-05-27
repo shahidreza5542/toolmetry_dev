@@ -1,7 +1,10 @@
 /**
- * toolmetryai — Base64 Encode / Decode
+ * toolmetry — Base64 Encode / Decode
  * Pure JS, no dependencies. Works in Node.js and browsers.
+ * @module base64
  */
+
+'use strict';
 
 /**
  * Encode a string to Base64.
@@ -9,12 +12,13 @@
  * @param {string} [encoding='utf-8'] - Character encoding.
  * @returns {string} Base64 encoded string.
  */
-function encode(input, encoding = 'utf-8') {
+function encode(input, encoding) {
   if (typeof input !== 'string') {
     throw new TypeError('Input must be a string');
   }
+  var enc = encoding || 'utf-8';
   if (typeof Buffer !== 'undefined') {
-    return Buffer.from(input, encoding).toString('base64');
+    return Buffer.from(input, enc).toString('base64');
   }
   return btoa(unescape(encodeURIComponent(input)));
 }
@@ -25,12 +29,13 @@ function encode(input, encoding = 'utf-8') {
  * @param {string} [encoding='utf-8'] - Character encoding.
  * @returns {string} Decoded string.
  */
-function decode(input, encoding = 'utf-8') {
+function decode(input, encoding) {
   if (typeof input !== 'string') {
     throw new TypeError('Input must be a string');
   }
+  var enc = encoding || 'utf-8';
   if (typeof Buffer !== 'undefined') {
-    return Buffer.from(input, 'base64').toString(encoding);
+    return Buffer.from(input, 'base64').toString(enc);
   }
   return decodeURIComponent(escape(atob(input)));
 }
@@ -56,7 +61,7 @@ function decodeURL(input) {
   if (typeof input !== 'string') {
     throw new TypeError('Input must be a string');
   }
-  let padded = input
+  var padded = input
     .replace(/-/g, '+')
     .replace(/_/g, '/');
   while (padded.length % 4 !== 0) {
@@ -72,7 +77,7 @@ function decodeURL(input) {
  */
 function isValid(input) {
   if (typeof input !== 'string') return false;
-  const regex = /^[A-Za-z0-9+/]*={0,2}$/;
+  var regex = /^[A-Za-z0-9+/]*={0,2}$/;
   return regex.test(input) && input.length % 4 === 0;
 }
 
@@ -82,9 +87,9 @@ function isValid(input) {
  * @returns {string} Base64 encoded string.
  */
 function encodeBuffer(buffer) {
-  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) {
+  var bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  var binary = '';
+  for (var i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
   if (typeof Buffer !== 'undefined') {
@@ -99,17 +104,17 @@ function encodeBuffer(buffer) {
  * @returns {Uint8Array} Decoded byte array.
  */
 function decodeToBuffer(input) {
-  let binary;
+  var binary;
   if (typeof Buffer !== 'undefined') {
     binary = Buffer.from(input, 'base64').toString('binary');
   } else {
     binary = atob(input);
   }
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
 }
 
-module.exports = { encode, decode, encodeURL, decodeURL, isValid, encodeBuffer, decodeToBuffer };
+module.exports = { encode: encode, decode: decode, encodeURL: encodeURL, decodeURL: decodeURL, isValid: isValid, encodeBuffer: encodeBuffer, decodeToBuffer: decodeToBuffer };

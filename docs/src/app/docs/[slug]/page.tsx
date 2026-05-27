@@ -1,388 +1,124 @@
-import { getToolBySlug, tools } from '../../../lib/tools-data';
-import Navbar from '../../../components/Navbar';
-import Sidebar from '../../../components/Sidebar';
-import Footer from '../../../components/Footer';
-import CodeBlock from '../../../components/CodeBlock';
-import TryItPanel from '../../../components/TryItPanel';
-import Link from 'next/link';
+"use client";
 
-// ✅ Required for output: "export"
-export async function generateStaticParams() {
-  return tools.map((tool) => ({
-    slug: tool.slug,
-  }));
-}
+import { use } from "react";
+import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/Footer";
+import Sidebar from "../../../components/Sidebar";
+import CodeBlock from "../../../components/CodeBlock";
+import TryItPanel from "../../../components/TryItPanel";
+import Link from "next/link";
+import { getToolBySlug, tools } from "../../../lib/tools-data";
 
-export default function ToolDocPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const tool = getToolBySlug(params.slug);
+export default function ToolDocPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const tool = getToolBySlug(slug);
 
   if (!tool) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--background)' }}>
+      <div style={{ minHeight: "100vh", background: "var(--color-surface)", paddingTop: "120px", textAlign: "center" }}>
         <Navbar />
-
-        <div style={{ padding: '80px 24px', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 700 }}>
-            Tool not found
-          </h1>
-
-          <p
-            style={{
-              color: 'var(--muted-foreground)',
-              marginTop: '12px',
-            }}
-          >
-            The tool &quot;{params.slug}&quot; does not exist.
-          </p>
-
-          <Link
-            href="/docs"
-            style={{
-              color: 'var(--primary)',
-              marginTop: '16px',
-              display: 'inline-block',
-            }}
-          >
-            Back to Docs
-          </Link>
-        </div>
+        <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "12px" }}>Tool Not Found</h1>
+        <p style={{ color: "var(--color-on-surface-variant)", marginBottom: "24px" }}>The tool &quot;{slug}&quot; does not exist.</p>
+        <Link href="/docs" style={{ color: "var(--color-primary)", fontWeight: 600 }}>Back to Docs</Link>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--background)' }}>
+    <div style={{ minHeight: "100vh", background: "var(--color-surface)" }}>
       <Navbar />
-
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: "flex", paddingTop: "72px" }}>
         <Sidebar />
-
-        <main
-          style={{
-            flex: 1,
-            padding: '32px 40px',
-            maxWidth: '900px',
-            overflowY: 'auto',
-          }}
-        >
-          {/* Breadcrumb */}
-          <div
-            style={{
-              fontSize: '13px',
-              color: 'var(--muted-foreground)',
-              marginBottom: '16px',
-            }}
-          >
-            <Link
-              href="/docs"
-              style={{
-                color: 'var(--primary)',
-                textDecoration: 'none',
-              }}
-            >
-              Docs
-            </Link>
-
-            <span style={{ margin: '0 8px' }}>/</span>
-
-            <span style={{ color: 'var(--muted-foreground)' }}>
-              {tool.category}
-            </span>
-
-            <span style={{ margin: '0 8px' }}>/</span>
-
-            <span style={{ color: 'var(--foreground)' }}>
-              {tool.name}
-            </span>
+        <main style={{ flex: 1, padding: "32px 40px", maxWidth: "900px" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "16px", fontSize: "13px" }}>
+            <Link href="/docs" style={{ color: "var(--color-primary)", textDecoration: "none" }}>Docs</Link>
+            <span style={{ color: "var(--color-outline)" }}>/</span>
+            <span style={{ color: "var(--color-on-surface-variant)" }}>{tool.category}</span>
+            <span style={{ color: "var(--color-outline)" }}>/</span>
+            <span style={{ color: "var(--color-on-surface)", fontWeight: 500 }}>{tool.name}</span>
           </div>
 
-          {/* Header */}
-          <div style={{ marginBottom: '32px' }}>
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '4px 12px',
-                borderRadius: '6px',
-                background: 'var(--accent)',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--primary)',
-                marginBottom: '12px',
-              }}
-            >
-              {tool.category}
+          <div style={{
+            display: "inline-block",
+            padding: "4px 10px",
+            borderRadius: "6px",
+            background: "var(--color-secondary-container)",
+            fontSize: "11px",
+            fontWeight: 600,
+            color: "var(--color-primary)",
+            marginBottom: "12px",
+          }}>
+            {tool.category}
+          </div>
+
+          <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "12px", letterSpacing: "-0.03em" }}>{tool.name}</h1>
+          <p style={{ fontSize: "15px", color: "var(--color-on-surface-variant)", lineHeight: 1.7, marginBottom: "32px" }}>
+            {tool.description}
+          </p>
+
+          <div style={{
+            background: "var(--color-surface-container)",
+            border: "1px solid var(--color-outline-variant)",
+            borderRadius: "10px",
+            padding: "14px 18px",
+            marginBottom: "32px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}>
+            <span style={{ fontSize: "13px", color: "var(--color-outline)", fontFamily: "var(--font-mono)" }}>$</span>
+            <code style={{ fontSize: "14px", fontFamily: "var(--font-mono)", color: "var(--color-primary)", fontWeight: 500 }}>npm i toolmetry</code>
+          </div>
+
+          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Functions</h2>
+          <div style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginBottom: "32px",
+            border: "1px solid var(--color-outline-variant)",
+            borderRadius: "10px",
+            overflow: "hidden",
+          }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--color-secondary-container)" }}>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Function</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Params</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Returns</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tool.functions.map((fn, i) => (
+                  <tr key={i} style={{ borderBottom: i < tool.functions.length - 1 ? "1px solid var(--color-outline-variant)" : "none" }}>
+                    <td style={{ padding: "10px 14px", fontSize: "13px", fontFamily: "var(--font-mono)", fontWeight: 500, color: "var(--color-primary)" }}>{fn.name}</td>
+                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "var(--color-on-surface-variant)" }}>
+                      {fn.params.map(p => (
+                        <span key={p.name} style={{ marginRight: "6px" }}>
+                          {p.required ? <b>{p.name}</b> : <span>{p.name}?</span>}
+                          <span style={{ color: "var(--color-outline)", marginLeft: "2px" }}>:{p.type}</span>
+                        </span>
+                      ))}
+                    </td>
+                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "var(--color-on-surface-variant)", fontFamily: "var(--font-mono)" }}>{fn.returns}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Examples</h2>
+          {tool.examples.map((ex, i) => (
+            <div key={i} style={{ marginBottom: "24px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", color: "var(--color-on-surface-variant)" }}>{ex.title}</h3>
+              <CodeBlock code={ex.code} language="javascript" />
             </div>
+          ))}
 
-            <h1
-              style={{
-                fontSize: '32px',
-                fontWeight: 800,
-                marginBottom: '8px',
-              }}
-            >
-              {tool.name}
-            </h1>
-
-            <p
-              style={{
-                fontSize: '16px',
-                color: 'var(--muted-foreground)',
-                lineHeight: 1.6,
-              }}
-            >
-              {tool.description}
-            </p>
-          </div>
-
-          {/* Install */}
-          <div
-            style={{
-              padding: '16px 20px',
-              borderRadius: '8px',
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              marginBottom: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-            }}
-          >
-            <code
-              style={{
-                fontFamily: 'monospace',
-                fontSize: '14px',
-                color: 'var(--primary)',
-              }}
-            >
-              npm i toolmetryai
-            </code>
-          </div>
-
-          {/* Functions */}
-          <section style={{ marginBottom: '40px' }}>
-            <h2
-              style={{
-                fontSize: '22px',
-                fontWeight: 700,
-                marginBottom: '20px',
-              }}
-            >
-              Functions
-            </h2>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-              }}
-            >
-              {tool.functions.map((fn) => (
-                <div
-                  key={fn.name}
-                  style={{
-                    padding: '20px',
-                    borderRadius: '12px',
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <code
-                      style={{
-                        fontFamily: 'monospace',
-                        fontSize: '15px',
-                        fontWeight: 600,
-                        color: 'var(--primary)',
-                      }}
-                    >
-                      {fn.name}
-                    </code>
-
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'var(--accent)',
-                        color: 'var(--muted-foreground)',
-                      }}
-                    >
-                      returns: {fn.returns}
-                    </span>
-                  </div>
-
-                  <p
-                    style={{
-                      fontSize: '14px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '12px',
-                    }}
-                  >
-                    {fn.description}
-                  </p>
-
-                  {fn.params.length > 0 && (
-                    <div style={{ overflowX: 'auto' }}>
-                      <table
-                        style={{
-                          width: '100%',
-                          borderCollapse: 'collapse',
-                          fontSize: '13px',
-                        }}
-                      >
-                        <thead>
-                          <tr
-                            style={{
-                              borderBottom: '1px solid var(--border)',
-                            }}
-                          >
-                            <th style={{ padding: '8px 12px', textAlign: 'left' }}>
-                              Param
-                            </th>
-
-                            <th style={{ padding: '8px 12px', textAlign: 'left' }}>
-                              Type
-                            </th>
-
-                            <th style={{ padding: '8px 12px', textAlign: 'left' }}>
-                              Required
-                            </th>
-
-                            <th style={{ padding: '8px 12px', textAlign: 'left' }}>
-                              Description
-                            </th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {fn.params.map((p) => (
-                            <tr
-                              key={p.name}
-                              style={{
-                                borderBottom: '1px solid var(--border)',
-                              }}
-                            >
-                              <td
-                                style={{
-                                  padding: '8px 12px',
-                                  fontFamily: 'monospace',
-                                  color: 'var(--primary)',
-                                }}
-                              >
-                                {p.name}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: '8px 12px',
-                                  color: 'var(--muted-foreground)',
-                                }}
-                              >
-                                {p.type}
-                              </td>
-
-                              <td style={{ padding: '8px 12px' }}>
-                                {p.required ? (
-                                  <span
-                                    style={{
-                                      color: '#ef4444',
-                                      fontWeight: 600,
-                                      fontSize: '12px',
-                                    }}
-                                  >
-                                    Yes
-                                  </span>
-                                ) : (
-                                  <span
-                                    style={{
-                                      color: 'var(--muted-foreground)',
-                                      fontSize: '12px',
-                                    }}
-                                  >
-                                    No
-                                    {p.default ? ` (${p.default})` : ''}
-                                  </span>
-                                )}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: '8px 12px',
-                                  color: 'var(--foreground)',
-                                }}
-                              >
-                                {p.description}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Examples */}
-          <section style={{ marginBottom: '40px' }}>
-            <h2
-              style={{
-                fontSize: '22px',
-                fontWeight: 700,
-                marginBottom: '20px',
-              }}
-            >
-              Examples
-            </h2>
-
-            {tool.examples.map((ex, i) => (
-              <div key={i} style={{ marginBottom: '16px' }}>
-                <h3
-                  style={{
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    marginBottom: '8px',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {ex.title}
-                </h3>
-
-                <CodeBlock code={ex.code} />
-              </div>
-            ))}
-          </section>
-
-          {/* Try It */}
-          <section style={{ marginBottom: '40px' }}>
-            <h2
-              style={{
-                fontSize: '22px',
-                fontWeight: 700,
-                marginBottom: '20px',
-              }}
-            >
-              Try It
-            </h2>
-
-            <TryItPanel toolSlug={tool.slug} />
-          </section>
+          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Try It Live</h2>
+          <TryItPanel toolName={tool.slug} />
         </main>
       </div>
-
       <Footer />
     </div>
   );

@@ -1,150 +1,97 @@
 /**
- * toolmetryai — Text Utility Tools
- * Case conversion, slug generation, word/char counting, and more.
+ * toolmetry — Text Utilities
+ * Case conversion, slugify, counting, and more.
+ * @module text
  */
 
-/**
- * Convert string to camelCase.
- * @param {string} input
- * @returns {string}
- */
+'use strict';
+
 function toCamelCase(input) {
-  return input
-    .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '')
-    .replace(/^[A-Z]/, c => c.toLowerCase());
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+    return index === 0 ? word.toLowerCase() : word.toUpperCase();
+  }).replace(/[\s_-]+/g, '');
 }
 
-/**
- * Convert string to PascalCase.
- * @param {string} input
- * @returns {string}
- */
 function toPascalCase(input) {
-  return input
-    .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '')
-    .replace(/^[a-z]/, c => c.toUpperCase());
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word) {
+    return word.toUpperCase();
+  }).replace(/[\s_-]+/g, '');
 }
 
-/**
- * Convert string to snake_case.
- * @param {string} input
- * @returns {string}
- */
 function toSnakeCase(input) {
-  return input
-    .replace(/([A-Z])/g, '_$1')
-    .replace(/[-\s]+/g, '_')
-    .replace(/^_/, '')
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/[\s-]+/g, '_')
     .toLowerCase();
 }
 
-/**
- * Convert string to kebab-case.
- * @param {string} input
- * @returns {string}
- */
 function toKebabCase(input) {
-  return input
-    .replace(/([A-Z])/g, '-$1')
-    .replace(/[_\s]+/g, '-')
-    .replace(/^-/, '')
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
     .toLowerCase();
 }
 
-/**
- * Convert string to CONSTANT_CASE.
- * @param {string} input
- * @returns {string}
- */
 function toConstantCase(input) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
   return toSnakeCase(input).toUpperCase();
 }
 
-/**
- * Generate a URL-safe slug from a string.
- * @param {string} input
- * @returns {string}
- */
 function slugify(input) {
-  return input
-    .toLowerCase()
-    .trim()
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.toLowerCase().trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
 
-/**
- * Count words in a string.
- * @param {string} input
- * @returns {number}
- */
 function wordCount(input) {
-  if (!input || !input.trim()) return 0;
-  return input.trim().split(/\s+/).length;
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  var trimmed = input.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
 }
 
-/**
- * Count characters in a string (with/without spaces).
- * @param {string} input
- * @param {boolean} [includeSpaces=true]
- * @returns {number}
- */
-function charCount(input, includeSpaces = true) {
-  if (!input) return 0;
-  return includeSpaces ? input.length : input.replace(/\s/g, '').length;
+function charCount(input, includeSpaces) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  if (includeSpaces) return input.length;
+  return input.replace(/\s/g, '').length;
 }
 
-/**
- * Reverse a string.
- * @param {string} input
- * @returns {string}
- */
 function reverse(input) {
-  return [...input].reverse().join('');
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  return input.split('').reverse().join('');
 }
 
-/**
- * Truncate a string to a maximum length, adding ellipsis.
- * @param {string} input
- * @param {number} maxLength
- * @param {string} [suffix='...']
- * @returns {string}
- */
-function truncate(input, maxLength, suffix = '...') {
-  if (!input || input.length <= maxLength) return input;
-  return input.slice(0, maxLength - suffix.length) + suffix;
+function truncate(input, maxLength, suffix) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
+  var max = maxLength || 50;
+  var suf = suffix || '...';
+  if (input.length <= max) return input;
+  return input.slice(0, max - suf.length) + suf;
 }
 
-/**
- * Remove extra whitespace from a string.
- * @param {string} input
- * @returns {string}
- */
 function removeExtraWhitespace(input) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
   return input.replace(/\s+/g, ' ').trim();
 }
 
-/**
- * Remove all line breaks from a string.
- * @param {string} input
- * @returns {string}
- */
 function removeLineBreaks(input) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
   return input.replace(/[\r\n]+/g, ' ').trim();
 }
 
-/**
- * Escape a string for use in a regular expression.
- * @param {string} input
- * @returns {string}
- */
 function escapeRegex(input) {
+  if (typeof input !== 'string') throw new TypeError('Input must be a string');
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 module.exports = {
-  toCamelCase, toPascalCase, toSnakeCase, toKebabCase, toConstantCase,
-  slugify, wordCount, charCount, reverse, truncate,
-  removeExtraWhitespace, removeLineBreaks, escapeRegex,
+  toCamelCase: toCamelCase, toPascalCase: toPascalCase, toSnakeCase: toSnakeCase,
+  toKebabCase: toKebabCase, toConstantCase: toConstantCase, slugify: slugify,
+  wordCount: wordCount, charCount: charCount, reverse: reverse, truncate: truncate,
+  removeExtraWhitespace: removeExtraWhitespace, removeLineBreaks: removeLineBreaks,
+  escapeRegex: escapeRegex,
 };

@@ -1,57 +1,74 @@
 /**
- * toolmetryai — Password Generator
+ * toolmetry — Password Generator
  * Generate secure random passwords with customizable options.
+ * @module password
  */
 
-const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
-const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const DIGITS = '0123456789';
-const SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+'use strict';
+
+var LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+var UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var DIGITS = '0123456789';
+var SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
 /**
- * Generate a random password.
- * @param {object} [options] - Password options.
- * @param {number} [options.length=16] - Password length.
- * @param {boolean} [options.lowercase=true] - Include lowercase letters.
- * @param {boolean} [options.uppercase=true] - Include uppercase letters.
- * @param {boolean} [options.digits=true] - Include digits.
- * @param {boolean} [options.symbols=true] - Include symbols.
- * @param {boolean} [options.excludeAmbiguous=false] - Exclude ambiguous chars (0Oo1lI).
- * @returns {string} Generated password.
+ * Get a secure random index (0 to max-1).
+ * @param {number} max - Upper bound (exclusive).
+ * @returns {number} Secure random index.
+ * @private
  */
-function generate(options = {}) {
-  const {
-    length = 16,
-    lowercase = true,
-    uppercase = true,
-    digits = true,
-    symbols = true,
-    excludeAmbiguous = false,
-  } = options;
+function _randomIndex(max) {
+  var nodeCrypto;
+  if (typeof require === 'function') {
+    try { nodeCrypto = require('crypto'); } catch (e) { nodeCrypto = null; }
+  }
+  if (nodeCrypto && nodeCrypto.randomInt) {
+    return nodeCrypto.randomInt(0, max);
+  }
+  var array = new Uint32Array(1);
+  var browserCrypto = (typeof globalThis !== 'undefined' && globalThis.crypto) ? globalThis.crypto : (typeof crypto !== 'undefined' ? crypto : null);
+  if (browserCrypto && browserCrypto.getRandomValues) {
+    browserCrypto.getRandomValues(array);
+  } else if (nodeCrypto) {
+    nodeCrypto.randomFillSync(array);
+  } else {
+    throw new Error('No secure random source available');
+  }
+  return array[0] % max;
+}
+
+function generate(options) {
+  var opts = options || {};
+  var length = opts.length || 16;
+  var lowercase = opts.lowercase !== undefined ? opts.lowercase : true;
+  var uppercase = opts.uppercase !== undefined ? opts.uppercase : true;
+  var digits = opts.digits !== undefined ? opts.digits : true;
+  var symbols = opts.symbols !== undefined ? opts.symbols : true;
+  var excludeAmbiguous = opts.excludeAmbiguous || false;
 
   if (length < 1) throw new RangeError('Password length must be at least 1');
   if (length > 1024) throw new RangeError('Password length must be at most 1024');
 
-  let chars = '';
-  const required = [];
+  var chars = '';
+  var required = [];
 
   if (lowercase) {
-    let set = LOWERCASE;
+    var set = LOWERCASE;
     if (excludeAmbiguous) set = set.replace(/[ol]/g, '');
     chars += set;
     required.push(set);
   }
   if (uppercase) {
-    let set = UPPERCASE;
-    if (excludeAmbiguous) set = set.replace(/[OI]/g, '');
-    chars += set;
-    required.push(set);
+    var set2 = UPPERCASE;
+    if (excludeAmbiguous) set2 = set2.replace(/[OI]/g, '');
+    chars += set2;
+    required.push(set2);
   }
   if (digits) {
-    let set = DIGITS;
-    if (excludeAmbiguous) set = set.replace(/[01]/g, '');
-    chars += set;
-    required.push(set);
+    var set3 = DIGITS;
+    if (excludeAmbiguous) set3 = set3.replace(/[01]/g, '');
+    chars += set3;
+    required.push(set3);
   }
   if (symbols) {
     chars += SYMBOLS;
@@ -60,36 +77,29 @@ function generate(options = {}) {
 
   if (chars.length === 0) throw new Error('At least one character set must be selected');
 
-  const result = [];
-  // Ensure at least one char from each required set
-  for (const set of required) {
-    result.push(set[_randomIndex(set.length)]);
+  var result = [];
+  for (var i = 0; i < required.length; i++) {
+    result.push(required[i][_randomIndex(required[i].length)]);
   }
-  // Fill remaining length with random chars from combined set
-  for (let i = result.length; i < length; i++) {
+  for (var j = result.length; j < length; j++) {
     result.push(chars[_randomIndex(chars.length)]);
   }
-  // Shuffle the result
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = _randomIndex(i + 1);
-    [result[i], result[j]] = [result[j], result[i]];
+  for (var k = result.length - 1; k > 0; k--) {
+    var l = _randomIndex(k + 1);
+    var temp = result[k];
+    result[k] = result[l];
+    result[l] = temp;
   }
 
   return result.join('');
 }
 
-/**
- * Generate a passphrase (multiple random words separated by dashes).
- * @param {object} [options] - Passphrase options.
- * @param {number} [options.words=4] - Number of words.
- * @param {string} [options.separator='-'] - Word separator.
- * @param {boolean} [options.capitalize=false] - Capitalize first letter of each word.
- * @returns {string} Generated passphrase.
- */
-function passphrase(options = {}) {
-  const { words = 4, separator = '-', capitalize = false } = options;
-  // Built-in word list (Efficient short list)
-  const wordList = [
+function passphrase(options) {
+  var opts = options || {};
+  var words = opts.words || 4;
+  var separator = opts.separator || '-';
+  var capitalize = opts.capitalize || false;
+  var wordList = [
     'apple', 'brave', 'cloud', 'dance', 'eagle', 'flame', 'grace', 'heart',
     'ivory', 'joker', 'karma', 'lemon', 'magic', 'noble', 'ocean', 'pearl',
     'quest', 'raven', 'storm', 'tiger', 'ultra', 'vivid', 'whale', 'xenon',
@@ -105,76 +115,46 @@ function passphrase(options = {}) {
     'urge', 'vale', 'wave', 'axon', 'yoga', 'zero',
   ];
 
-  const result = [];
-  for (let i = 0; i < words; i++) {
-    const word = wordList[_randomIndex(wordList.length)];
+  var result = [];
+  for (var i = 0; i < words; i++) {
+    var word = wordList[_randomIndex(wordList.length)];
     result.push(capitalize ? word.charAt(0).toUpperCase() + word.slice(1) : word);
   }
   return result.join(separator);
 }
 
-/**
- * Check password strength.
- * @param {string} password - The password to check.
- * @returns {{ score: number, label: string, suggestions: string[] }} Strength info.
- */
 function strength(password) {
   if (typeof password !== 'string') throw new TypeError('Input must be a string');
 
-  let score = 0;
-  const suggestions = [];
+  var score = 0;
+  var suggestions = [];
 
   if (password.length >= 8) score += 1;
   else suggestions.push('Use at least 8 characters');
-
   if (password.length >= 12) score += 1;
   if (password.length >= 16) score += 1;
-
   if (/[a-z]/.test(password)) score += 1;
   else suggestions.push('Add lowercase letters');
-
   if (/[A-Z]/.test(password)) score += 1;
   else suggestions.push('Add uppercase letters');
-
   if (/[0-9]/.test(password)) score += 1;
   else suggestions.push('Add numbers');
-
   if (/[^a-zA-Z0-9]/.test(password)) score += 1;
   else suggestions.push('Add special characters');
-
-  // Penalize common patterns
   if (/^[a-zA-Z]+$/.test(password)) { score -= 1; suggestions.push('Mix letters with numbers and symbols'); }
   if (/^[0-9]+$/.test(password)) { score -= 1; suggestions.push('Add letters and symbols'); }
   if (/(.)\1{2,}/.test(password)) { score -= 1; suggestions.push('Avoid repeating characters'); }
   if (/^(123|abc|qwerty|password)/i.test(password)) { score -= 2; suggestions.push('Avoid common patterns'); }
 
   score = Math.max(0, Math.min(7, score));
-
-  const labels = ['Very Weak', 'Very Weak', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong', 'Excellent'];
-
-  return { score, label: labels[score], suggestions };
+  var labels = ['Very Weak', 'Very Weak', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong', 'Excellent'];
+  return { score: score, label: labels[score], suggestions: suggestions };
 }
 
-/**
- * Generate multiple passwords at once.
- * @param {number} count - Number of passwords to generate.
- * @param {object} [options] - Same options as generate().
- * @returns {string[]} Array of generated passwords.
- */
-function generateBatch(count, options = {}) {
+function generateBatch(count, options) {
   if (typeof count !== 'number' || count < 1) throw new TypeError('Count must be a positive number');
   if (count > 100) throw new RangeError('Maximum batch size is 100');
-  return Array.from({ length: count }, () => generate(options));
+  return Array.from({ length: count }, function() { return generate(options); });
 }
 
-function _randomIndex(max) {
-  if (typeof crypto !== 'undefined' && crypto.randomInt) {
-    return crypto.randomInt(0, max);
-  }
-  // Browser fallback
-  const array = new Uint32Array(1);
-  (typeof crypto !== 'undefined' ? crypto : require('crypto')).getRandomValues(array);
-  return array[0] % max;
-}
-
-module.exports = { generate, passphrase, strength, generateBatch };
+module.exports = { generate: generate, passphrase: passphrase, strength: strength, generateBatch: generateBatch };

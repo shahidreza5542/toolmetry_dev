@@ -1,123 +1,101 @@
 /**
- * toolmetryai — Diff Checker
- * Compare two strings and find differences line by line.
+ * toolmetry — Diff Checker
+ * Compare text and generate diffs using LCS algorithm.
+ * @module diff
  */
 
-/**
- * Compare two strings and return line-by-line diff.
- * @param {string} oldText - The original text.
- * @param {string} newText - The modified text.
- * @returns {{ lines: Array<{type: 'same'|'added'|'removed', content: string, line: number}>, stats: {added: number, removed: number, unchanged: number} }}
- */
+'use strict';
+
 function diff(oldText, newText) {
   if (typeof oldText !== 'string' || typeof newText !== 'string') {
     throw new TypeError('Both inputs must be strings');
   }
 
-  const oldLines = oldText.split('\n');
-  const newLines = newText.split('\n');
+  var oldLines = oldText.split('\n');
+  var newLines = newText.split('\n');
+  var lcs = _lcs(oldLines, newLines);
 
-  // Simple LCS-based diff
-  const lcs = _lcs(oldLines, newLines);
+  var result = [];
+  var stats = { added: 0, removed: 0, unchanged: 0 };
+  var oi = 0, ni = 0, li = 0;
 
-  const result = [];
-  let oldIdx = 0;
-  let newIdx = 0;
-  let lcsIdx = 0;
-  let added = 0;
-  let removed = 0;
-  let unchanged = 0;
-  let lineNum = 0;
-
-  while (oldIdx < oldLines.length || newIdx < newLines.length) {
-    if (lcsIdx < lcs.length && oldIdx < oldLines.length && oldLines[oldIdx] === lcs[lcsIdx] && newIdx < newLines.length && newLines[newIdx] === lcs[lcsIdx]) {
-      lineNum++;
-      result.push({ type: 'same', content: oldLines[oldIdx], line: lineNum });
-      unchanged++;
-      oldIdx++;
-      newIdx++;
-      lcsIdx++;
-    } else if (newIdx < newLines.length && (lcsIdx >= lcs.length || newLines[newIdx] !== lcs[lcsIdx])) {
-      lineNum++;
-      result.push({ type: 'added', content: newLines[newIdx], line: lineNum });
-      added++;
-      newIdx++;
-    } else if (oldIdx < oldLines.length && (lcsIdx >= lcs.length || oldLines[oldIdx] !== lcs[lcsIdx])) {
-      result.push({ type: 'removed', content: oldLines[oldIdx], line: lineNum });
-      removed++;
-      oldIdx++;
+  while (oi < oldLines.length || ni < newLines.length) {
+    if (li < lcs.length && oi < oldLines.length && ni < newLines.length &&
+        oldLines[oi] === lcs[li] && newLines[ni] === lcs[li]) {
+      result.push({ type: 'same', content: oldLines[oi], line: oi + 1 });
+      stats.unchanged++;
+      oi++; ni++; li++;
+    } else if (li < lcs.length && oi < oldLines.length && oldLines[oi] !== lcs[li]) {
+      result.push({ type: 'removed', content: oldLines[oi], line: oi + 1 });
+      stats.removed++;
+      oi++;
+    } else if (li < lcs.length && ni < newLines.length && newLines[ni] !== lcs[li]) {
+      result.push({ type: 'added', content: newLines[ni], line: ni + 1 });
+      stats.added++;
+      ni++;
+    } else if (oi < oldLines.length) {
+      result.push({ type: 'removed', content: oldLines[oi], line: oi + 1 });
+      stats.removed++;
+      oi++;
+    } else if (ni < newLines.length) {
+      result.push({ type: 'added', content: newLines[ni], line: ni + 1 });
+      stats.added++;
+      ni++;
     }
   }
 
-  return {
-    lines: result,
-    stats: { added, removed, unchanged },
-  };
+  return { lines: result, stats: stats };
 }
 
-/**
- * Generate a unified diff string.
- * @param {string} oldText - The original text.
- * @param {string} newText - The modified text.
- * @param {string} [oldLabel='original'] - Label for old text.
- * @param {string} [newLabel='modified'] - Label for new text.
- * @returns {string} Unified diff string.
- */
-function unifiedDiff(oldText, newText, oldLabel = 'original', newLabel = 'modified') {
-  const result = diff(oldText, newText);
-  const lines = [`--- ${oldLabel}`, `+++ ${newLabel}`];
-
-  for (const line of result.lines) {
-    if (line.type === 'added') lines.push(`+ ${line.content}`);
-    else if (line.type === 'removed') lines.push(`- ${line.content}`);
-    else lines.push(`  ${line.content}`);
+function unifiedDiff(oldText, newText, oldLabel, newLabel) {
+  var ol = oldLabel || 'original';
+  var nl = newLabel || 'modified';
+  var result = diff(oldText, newText);
+  var lines = ['--- ' + ol, '+++ ' + nl];
+  for (var i = 0; i < result.lines.length; i++) {
+    var line = result.lines[i];
+    var prefix = line.type === 'added' ? '+' : (line.type === 'removed' ? '-' : ' ');
+    lines.push(prefix + line.content);
   }
-
   return lines.join('\n');
 }
 
-/**
- * Check if two strings are identical.
- * @param {string} a - First string.
- * @param {string} b - Second string.
- * @returns {boolean} True if identical.
- */
 function isSame(a, b) {
   return a === b;
 }
 
 function _lcs(a, b) {
-  const m = a.length;
-  const n = b.length;
-  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
+  var m = a.length, n = b.length;
+  var dp = [];
+  for (var i = 0; i <= m; i++) {
+    dp[i] = [];
+    for (var j = 0; j <= n; j++) {
+      dp[i][j] = 0;
+    }
+  }
+  for (var i2 = 1; i2 <= m; i2++) {
+    for (var j2 = 1; j2 <= n; j2++) {
+      if (a[i2 - 1] === b[j2 - 1]) {
+        dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
       } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
       }
     }
   }
 
-  // Backtrack to find LCS
-  const result = [];
-  let i = m;
-  let j = n;
-  while (i > 0 && j > 0) {
-    if (a[i - 1] === b[j - 1]) {
-      result.unshift(a[i - 1]);
-      i--;
-      j--;
-    } else if (dp[i - 1][j] > dp[i][j - 1]) {
-      i--;
+  var result = [];
+  var i3 = m, j3 = n;
+  while (i3 > 0 && j3 > 0) {
+    if (a[i3 - 1] === b[j3 - 1]) {
+      result.unshift(a[i3 - 1]);
+      i3--; j3--;
+    } else if (dp[i3 - 1][j3] > dp[i3][j3 - 1]) {
+      i3--;
     } else {
-      j--;
+      j3--;
     }
   }
-
   return result;
 }
 
-module.exports = { diff, unifiedDiff, isSame };
+module.exports = { diff: diff, unifiedDiff: unifiedDiff, isSame: isSame };

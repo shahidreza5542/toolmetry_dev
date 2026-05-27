@@ -2,7 +2,37 @@
  * toolmetry — AES-256 Encrypt / Decrypt
  * Secure text encryption and decryption using AES-256-GCM.
  * Uses Node.js crypto module (with SubtleCrypto browser fallback for async).
+ * @module encrypt
  */
+
+'use strict';
+
+/**
+ * Get the Node.js crypto module.
+ * @returns {object|null} Node.js crypto module or null.
+ * @private
+ */
+function _getNodeCrypto() {
+  if (typeof require === 'function') {
+    try { return require('crypto'); } catch (e) { return null; }
+  }
+  return null;
+}
+
+/**
+ * Get the browser/global crypto object.
+ * @returns {object} Crypto object (SubtleCrypto).
+ * @private
+ */
+function _getBrowserCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+    return globalThis.crypto;
+  }
+  if (typeof crypto !== 'undefined') {
+    return crypto;
+  }
+  throw new Error('No crypto module available');
+}
 
 /**
  * Encrypt a string using AES-256-GCM.
@@ -18,20 +48,20 @@ function encrypt(plaintext, secret) {
     throw new TypeError('Secret must be a non-empty string');
   }
 
-  const crypto = _getCrypto();
-  if (!crypto.createCipheriv) {
+  var crypto = _getNodeCrypto();
+  if (!crypto || !crypto.createCipheriv) {
     throw new Error('Synchronous AES encryption requires Node.js crypto. Use encryptAsync() for browser support.');
   }
 
-  const key = _deriveKeySync(secret, crypto);
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  var key = _deriveKeySync(secret, crypto);
+  var iv = crypto.randomBytes(12);
+  var cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
 
-  let ciphertext = cipher.update(plaintext, 'utf8', 'base64');
+  var ciphertext = cipher.update(plaintext, 'utf8', 'base64');
   ciphertext += cipher.final('base64');
-  const authTag = cipher.getAuthTag();
+  var authTag = cipher.getAuthTag();
 
-  return `${iv.toString('base64')}:${authTag.toString('base64')}:${ciphertext}`;
+  return iv.toString('base64') + ':' + authTag.toString('base64') + ':' + ciphertext;
 }
 
 /**
@@ -48,25 +78,27 @@ function decrypt(encrypted, secret) {
     throw new TypeError('Secret must be a non-empty string');
   }
 
-  const crypto = _getCrypto();
-  if (!crypto.createDecipheriv) {
+  var crypto = _getNodeCrypto();
+  if (!crypto || !crypto.createDecipheriv) {
     throw new Error('Synchronous AES decryption requires Node.js crypto. Use decryptAsync() for browser support.');
   }
 
-  const parts = encrypted.split(':');
+  var parts = encrypted.split(':');
   if (parts.length !== 3) {
     throw new Error('Invalid encrypted format. Expected "iv:authTag:ciphertext"');
   }
 
-  const [ivB64, authTagB64, ciphertext] = parts;
-  const key = _deriveKeySync(secret, crypto);
-  const iv = Buffer.from(ivB64, 'base64');
-  const authTag = Buffer.from(authTagB64, 'base64');
+  var ivB64 = parts[0];
+  var authTagB64 = parts[1];
+  var ciphertext = parts[2];
+  var key = _deriveKeySync(secret, crypto);
+  var iv = Buffer.from(ivB64, 'base64');
+  var authTag = Buffer.from(authTagB64, 'base64');
 
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  var decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
 
-  let plaintext = decipher.update(ciphertext, 'base64', 'utf8');
+  var plaintext = decipher.update(ciphertext, 'base64', 'utf8');
   plaintext += decipher.final('utf8');
 
   return plaintext;
@@ -82,20 +114,21 @@ async function encryptAsync(plaintext, secret) {
   if (typeof plaintext !== 'string') throw new TypeError('Plaintext must be a string');
   if (typeof secret !== 'string' || secret.length < 1) throw new TypeError('Secret must be a non-empty string');
 
-  const encoder = new TextEncoder();
-  const keyMaterial = await _importKey(secret);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = encoder.encode(plaintext);
+  var browserCrypto = _getBrowserCrypto();
+  var encoder = new TextEncoder();
+  var keyMaterial = await _importKey(secret, browserCrypto);
+  var iv = browserCrypto.getRandomValues(new Uint8Array(12));
+  var encoded = encoder.encode(plaintext);
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
+  var ciphertext = await browserCrypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv },
     keyMaterial,
     encoded
   );
 
-  const ivB64 = _bufferToBase64url(iv);
-  const ctB64 = _bufferToBase64url(new Uint8Array(ciphertext));
-  return `${ivB64}:${ctB64}`;
+  var ivB64 = _bufferToBase64url(iv);
+  var ctB64 = _bufferToBase64url(new Uint8Array(ciphertext));
+  return ivB64 + ':' + ctB64;
 }
 
 /**
@@ -108,16 +141,18 @@ async function decryptAsync(encrypted, secret) {
   if (typeof encrypted !== 'string') throw new TypeError('Encrypted text must be a string');
   if (typeof secret !== 'string' || secret.length < 1) throw new TypeError('Secret must be a non-empty string');
 
-  const parts = encrypted.split(':');
+  var parts = encrypted.split(':');
   if (parts.length !== 2) throw new Error('Invalid encrypted format. Expected "iv:ciphertext"');
 
-  const [ivB64, ctB64] = parts;
-  const keyMaterial = await _importKey(secret);
-  const iv = _base64urlToBuffer(ivB64);
-  const ciphertext = _base64urlToBuffer(ctB64);
+  var ivB64 = parts[0];
+  var ctB64 = parts[1];
+  var browserCrypto = _getBrowserCrypto();
+  var keyMaterial = await _importKey(secret, browserCrypto);
+  var iv = _base64urlToBuffer(ivB64);
+  var ciphertext = _base64urlToBuffer(ctB64);
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
+  var decrypted = await browserCrypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv },
     keyMaterial,
     ciphertext
   );
@@ -125,16 +160,30 @@ async function decryptAsync(encrypted, secret) {
   return new TextDecoder().decode(decrypted);
 }
 
+/**
+ * Derive a 256-bit key from a secret using PBKDF2 (Node.js sync).
+ * @param {string} secret - The secret string.
+ * @param {object} crypto - Node.js crypto module.
+ * @returns {Buffer} Derived key.
+ * @private
+ */
 function _deriveKeySync(secret, crypto) {
-  const salt = crypto.createHash('sha256').update('toolmetry-aes-salt').digest();
+  var salt = crypto.createHash('sha256').update('toolmetry-aes-salt').digest();
   return crypto.pbkdf2Sync(secret, salt, 100000, 32, 'sha256');
 }
 
-async function _importKey(secret) {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const hash = await crypto.subtle.digest('SHA-256', keyData);
-  return crypto.subtle.importKey(
+/**
+ * Import a key for SubtleCrypto (browser async).
+ * @param {string} secret - The secret string.
+ * @param {object} browserCrypto - Browser crypto object.
+ * @returns {Promise<CryptoKey>} Imported key.
+ * @private
+ */
+async function _importKey(secret, browserCrypto) {
+  var encoder = new TextEncoder();
+  var keyData = encoder.encode(secret);
+  var hash = await browserCrypto.subtle.digest('SHA-256', keyData);
+  return browserCrypto.subtle.importKey(
     { name: 'AES-GCM' },
     hash,
     { name: 'AES-GCM' },
@@ -143,30 +192,34 @@ async function _importKey(secret) {
   );
 }
 
+/**
+ * Convert buffer to Base64URL string.
+ * @param {Uint8Array} buffer - The buffer to convert.
+ * @returns {string} Base64URL encoded string.
+ * @private
+ */
 function _bufferToBase64url(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  bytes.forEach(b => binary += String.fromCharCode(b));
+  var bytes = new Uint8Array(buffer);
+  var binary = '';
+  for (var i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+/**
+ * Convert Base64URL string to Uint8Array.
+ * @param {string} b64url - Base64URL encoded string.
+ * @returns {Uint8Array} Decoded byte array.
+ * @private
+ */
 function _base64urlToBuffer(b64url) {
-  let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  var b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
   while (b64.length % 4 !== 0) b64 += '=';
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  var binary = atob(b64);
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
 }
 
-function _getCrypto() {
-  if (typeof require === 'function') {
-    try { return require('crypto'); } catch { /* not in Node */ }
-  }
-  if (typeof globalThis !== 'undefined' && globalThis.crypto) {
-    return globalThis.crypto;
-  }
-  throw new Error('No crypto module available');
-}
-
-module.exports = { encrypt, decrypt, encryptAsync, decryptAsync };
+module.exports = { encrypt: encrypt, decrypt: decrypt, encryptAsync: encryptAsync, decryptAsync: decryptAsync };

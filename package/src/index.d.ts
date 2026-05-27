@@ -1,4 +1,7 @@
-// toolmetry — TypeScript Declarations v3.0.0
+/**
+ * toolmetry — TypeScript Declarations v3.1.0
+ * Comprehensive Developer Tools Library
+ */
 
 // ─── Base64 ─────────────────────────────────────────────────────────────────
 export function base64Encode(input: string, encoding?: string): string;
@@ -35,15 +38,23 @@ export const url: {
 // ─── Hash ───────────────────────────────────────────────────────────────────
 export const ALGORITHMS: string[];
 export function hashGenerate(input: string, algorithm?: string, encoding?: string): string;
-export function hashGenerateAsync(input: string, algorithm?: string, encoding?: string): Promise<string>;
+export function hashAsync(input: string, algorithm?: string, encoding?: string): Promise<string>;
 export function hmacGenerate(input: string, secret: string, algorithm?: string): string;
-export function hashGenerateAll(input: string): Record<string, string>;
+export function hashAll(input: string): Record<string, string>;
+
+export const hash: {
+  hash: typeof hashGenerate;
+  hashAsync: typeof hashAsync;
+  hmac: typeof hmacGenerate;
+  hashAll: typeof hashAll;
+  ALGORITHMS: typeof ALGORITHMS;
+};
 
 // ─── JWT ────────────────────────────────────────────────────────────────────
-export function jwtDecode(token: string): Record<string, unknown>;
+export function jwtDecode(token: string): { header: Record<string, unknown>; payload: Record<string, unknown>; signature: string };
 export function jwtDecodeHeader(token: string): Record<string, unknown>;
 export function jwtDecodePayload(token: string): Record<string, unknown>;
-export function jwtIsExpired(token: string): boolean;
+export function jwtIsExpired(token: string, graceSeconds?: number): boolean;
 export function jwtIsValidFormat(token: string): boolean;
 export function jwtGetAlgorithm(token: string): string | null;
 export function jwtTimeUntilExpiry(token: string): number | null;
@@ -112,31 +123,61 @@ export const random: {
 };
 
 // ─── Color ──────────────────────────────────────────────────────────────────
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null;
+export function hexToRgb(hex: string): { r: number; g: number; b: number };
 export function rgbToHex(r: number, g: number, b: number): string;
 export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number };
 export function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number };
-export function hexToHsl(hex: string): { h: number; s: number; l: number } | null;
+export function hexToHsl(hex: string): { h: number; s: number; l: number };
 export function hslToHex(h: number, s: number, l: number): string;
 export function colorConvert(value: string, from: string, to: string): string | null;
 export function colorIsValidHex(hex: string): boolean;
 export function colorLighten(hex: string, amount: number): string;
 export function colorDarken(hex: string, amount: number): string;
 
+export const color: {
+  hexToRgb: typeof hexToRgb;
+  rgbToHex: typeof rgbToHex;
+  rgbToHsl: typeof rgbToHsl;
+  hslToRgb: typeof hslToRgb;
+  hexToHsl: typeof hexToHsl;
+  hslToHex: typeof hslToHex;
+  convert: typeof colorConvert;
+  isValidHex: typeof colorIsValidHex;
+  lighten: typeof colorLighten;
+  darken: typeof colorDarken;
+};
+
 // ─── HTML Entity ────────────────────────────────────────────────────────────
 export function htmlEntityEncode(input: string): string;
 export function htmlEntityDecode(input: string): string;
 export function htmlEntityEncodeAll(input: string): string;
-export function htmlEntityEncodeChars(input: string): string;
+export function htmlEntityEncodeChars(input: string): Record<string, string>;
+
+export const htmlEntity: {
+  encode: typeof htmlEntityEncode;
+  decode: typeof htmlEntityDecode;
+  encodeAll: typeof htmlEntityEncodeAll;
+  encodeChars: typeof htmlEntityEncodeChars;
+};
 
 // ─── Number Base ────────────────────────────────────────────────────────────
-export function baseConvert(value: string, fromBase: number, toBase: number): string;
+export function baseConvert(value: string | number, fromBase: number, toBase: number): string;
 export function toBinary(value: string | number): string;
 export function toOctal(value: string | number): string;
 export function toHex(value: string | number): string;
 export function fromBinary(binary: string): number;
 export function fromHex(hex: string): number;
 export function convertAllBases(value: string | number): Record<string, string>;
+
+export const numberBase: {
+  convert: typeof baseConvert;
+  toBinary: typeof toBinary;
+  toOctal: typeof toOctal;
+  toHex: typeof toHex;
+  fromBinary: typeof fromBinary;
+  fromHex: typeof fromHex;
+  convertAll: typeof convertAllBases;
+};
 
 // ─── Text ───────────────────────────────────────────────────────────────────
 export function toCamelCase(input: string): string;
@@ -153,6 +194,22 @@ export function removeExtraWhitespace(input: string): string;
 export function removeLineBreaks(input: string): string;
 export function escapeRegex(input: string): string;
 
+export const text: {
+  toCamelCase: typeof toCamelCase;
+  toPascalCase: typeof toPascalCase;
+  toSnakeCase: typeof toSnakeCase;
+  toKebabCase: typeof toKebabCase;
+  toConstantCase: typeof toConstantCase;
+  slugify: typeof slugify;
+  wordCount: typeof wordCount;
+  charCount: typeof charCount;
+  reverse: typeof reverse;
+  truncate: typeof truncate;
+  removeExtraWhitespace: typeof removeExtraWhitespace;
+  removeLineBreaks: typeof removeLineBreaks;
+  escapeRegex: typeof escapeRegex;
+};
+
 // ─── JSON ───────────────────────────────────────────────────────────────────
 export function jsonFormat(input: string, indent?: number): string;
 export function jsonMinify(input: string): string;
@@ -160,6 +217,15 @@ export function jsonValidate(input: string): { valid: boolean; error: string | n
 export function jsonGetType(input: string): string;
 export function jsonStats(input: string): { type: string; keys: number | null; depth: number; size: number };
 export function jsonFlatten(input: string): Record<string, unknown>;
+
+export const json: {
+  format: typeof jsonFormat;
+  minify: typeof jsonMinify;
+  validate: typeof jsonValidate;
+  getType: typeof jsonGetType;
+  stats: typeof jsonStats;
+  flatten: typeof jsonFlatten;
+};
 
 // ─── Password ───────────────────────────────────────────────────────────────
 export interface PasswordOptions {

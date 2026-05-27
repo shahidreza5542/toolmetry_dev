@@ -1,349 +1,307 @@
-/**
- * Browser-compatible toolmetry functions for the Playground
- * These are pure JS implementations that work in the browser
- */
-
-// ─── Base64 ─────────────────────────────────────────────────────────────────
-export function base64Encode(input: string): string {
-  return btoa(unescape(encodeURIComponent(input)));
+export interface PlaygroundFunction {
+  tool: string;
+  name: string;
+  params: { name: string; placeholder: string; default?: string }[];
+  execute: (args: string[]) => Promise<string>;
 }
 
-export function base64Decode(input: string): string {
-  return decodeURIComponent(escape(atob(input)));
-}
-
-export function base64IsValid(input: string): boolean {
-  if (typeof input !== 'string') return false;
-  return /^[A-Za-z0-9+/]*={0,2}$/.test(input) && input.length % 4 === 0;
-}
-
-// ─── URL ────────────────────────────────────────────────────────────────────
-export function urlEncode(input: string): string {
-  return encodeURIComponent(input);
-}
-
-export function urlDecode(input: string): string {
-  return decodeURIComponent(input);
-}
-
-export function urlBuildQuery(params: Record<string, string | number | boolean>): string {
-  const entries = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
-  return entries.length > 0 ? '?' + entries.join('&') : '';
-}
-
-export function urlParseQuery(qs: string): Record<string, string> {
-  const str = qs.startsWith('?') ? qs.slice(1) : qs;
-  if (!str) return {};
-  const params: Record<string, string> = {};
-  str.split('&').forEach(pair => {
-    const [key, ...rest] = pair.split('=');
-    if (key) params[decodeURIComponent(key)] = decodeURIComponent(rest.join('='));
-  });
-  return params;
-}
-
-// ─── Hash ───────────────────────────────────────────────────────────────────
-export async function hashGenerate(input: string, algorithm: string = 'SHA-256'): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest(algorithm, data);
-  const bytes = new Uint8Array(hashBuffer);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// ─── JWT ────────────────────────────────────────────────────────────────────
-export function jwtDecode(token: string) {
-  const parts = token.split('.');
-  if (parts.length !== 3) throw new Error('Invalid JWT: must have 3 parts');
-  const decode64 = (b64url: string) => {
-    let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
-    while (b64.length % 4 !== 0) b64 += '=';
-    return JSON.parse(decodeURIComponent(escape(atob(b64))));
-  };
-  return { header: decode64(parts[0]), payload: decode64(parts[1]), signature: parts[2] };
-}
-
-export function jwtIsExpired(token: string): boolean {
-  try {
-    const { payload } = jwtDecode(token);
-    if (!payload.exp) return false;
-    return Date.now() / 1000 > payload.exp;
-  } catch { return false; }
-}
-
-export function jwtIsValidFormat(token: string): boolean {
-  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*$/.test(token);
-}
-
-// ─── UUID ───────────────────────────────────────────────────────────────────
-export function uuidV4(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-}
-
-export function uuidIsValid(uuid: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid);
-}
-
-// ─── AES-256 (async, browser SubtleCrypto) ──────────────────────────────────
-export async function aesEncrypt(plaintext: string, secret: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const hash = await crypto.subtle.digest('SHA-256', keyData);
-  const key = await crypto.subtle.importKey({ name: 'AES-GCM' }, hash, { name: 'AES-GCM' }, false, ['encrypt']);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoder.encode(plaintext));
-  const ivB64 = btoa(String.fromCharCode(...iv));
-  const ctB64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)));
-  return `${ivB64}:${ctB64}`;
-}
-
-export async function aesDecrypt(encrypted: string, secret: string): Promise<string> {
-  const [ivB64, ctB64] = encrypted.split(':');
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const hash = await crypto.subtle.digest('SHA-256', keyData);
-  const key = await crypto.subtle.importKey({ name: 'AES-GCM' }, hash, { name: 'AES-GCM' }, false, ['decrypt']);
-  const iv = Uint8Array.from(atob(ivB64), c => c.charCodeAt(0));
-  const ciphertext = Uint8Array.from(atob(ctB64), c => c.charCodeAt(0));
-  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-  return new TextDecoder().decode(decrypted);
-}
-
-// ─── Random ─────────────────────────────────────────────────────────────────
-const LOWER = 'abcdefghijklmnopqrstuvwxyz';
-const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const DIGITS = '0123456789';
-const ALPHANUM = LOWER + UPPER + DIGITS;
-
-export function randomString(length: number = 16, options: { lowercase?: boolean; uppercase?: boolean; digits?: boolean; symbols?: boolean } = {}): string {
-  const { lowercase = true, uppercase = true, digits = true, symbols = false } = options;
-  let chars = '';
-  if (lowercase) chars += LOWER;
-  if (uppercase) chars += UPPER;
-  if (digits) chars += DIGITS;
-  if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  if (!chars) throw new Error('At least one character set needed');
-  const arr = crypto.getRandomValues(new Uint32Array(length));
-  return Array.from(arr, v => chars[v % chars.length]).join('');
-}
-
-export function randomInt(min: number, max: number): number {
-  const range = max - min + 1;
-  const arr = crypto.getRandomValues(new Uint32Array(1));
-  return min + (arr[0] % range);
-}
-
-export function randomHex(length: number = 32): string {
-  const arr = crypto.getRandomValues(new Uint32Array(length));
-  return Array.from(arr, v => (v % 16).toString(16)).join('');
-}
-
-export function randomAlphanumeric(length: number = 16): string {
-  const arr = crypto.getRandomValues(new Uint32Array(length));
-  return Array.from(arr, v => ALPHANUM[v % ALPHANUM.length]).join('');
-}
-
-export function randomBoolean(): boolean {
-  const arr = crypto.getRandomValues(new Uint8Array(1));
-  return arr[0] % 2 === 1;
-}
-
-// ─── Color ──────────────────────────────────────────────────────────────────
-export function hexToRgb(hex: string) {
-  const h = hex.replace(/^#/, '').toLowerCase();
-  const padded = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-  return {
-    r: parseInt(padded.slice(0, 2), 16),
-    g: parseInt(padded.slice(2, 4), 16),
-    b: parseInt(padded.slice(4, 6), 16),
-  };
-}
-
-export function rgbToHex(r: number, g: number, b: number): string {
-  return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
-}
-
-// ─── HTML Entity ────────────────────────────────────────────────────────────
-export function htmlEntityEncode(input: string): string {
-  return input.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
-}
-
-export function htmlEntityDecode(input: string): string {
-  const map: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
-  let result = input.replace(/&[a-zA-Z]+;/g, entity => map[entity] || entity);
-  result = result.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
-  return result;
-}
-
-// ─── Number Base ────────────────────────────────────────────────────────────
-export function toBinary(value: string | number): string { return Number(value).toString(2).toUpperCase(); }
-export function toHex(value: string | number): string { return Number(value).toString(16).toUpperCase(); }
-export function toOctal(value: string | number): string { return Number(value).toString(8).toUpperCase(); }
-
-// ─── Text ───────────────────────────────────────────────────────────────────
-export function toCamelCase(input: string): string {
-  return input.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '').replace(/^[A-Z]/, c => c.toLowerCase());
-}
-export function toSnakeCase(input: string): string {
-  return input.replace(/([A-Z])/g, '_$1').replace(/[-\s]+/g, '_').replace(/^_/, '').toLowerCase();
-}
-export function toKebabCase(input: string): string {
-  return input.replace(/([A-Z])/g, '-$1').replace(/[_\s]+/g, '-').replace(/^-/, '').toLowerCase();
-}
-export function slugify(input: string): string {
-  return input.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
-}
-export function wordCount(input: string): number {
-  return input.trim().split(/\s+/).filter(Boolean).length;
-}
-
-// ─── JSON ───────────────────────────────────────────────────────────────────
-export function jsonFormat(input: string, indent: number = 2): string {
-  return JSON.stringify(JSON.parse(input), null, indent);
-}
-export function jsonMinify(input: string): string {
-  return JSON.stringify(JSON.parse(input));
-}
-export function jsonValidate(input: string) {
-  try { JSON.parse(input); return { valid: true, error: null }; }
-  catch (e: any) { return { valid: false, error: e.message }; }
-}
-
-// ─── Password ───────────────────────────────────────────────────────────────
-export function passwordGenerate(options: { length?: number; lowercase?: boolean; uppercase?: boolean; digits?: boolean; symbols?: boolean } = {}): string {
-  const { length = 16, lowercase = true, uppercase = true, digits = true, symbols = true } = options;
-  let chars = '';
-  if (lowercase) chars += LOWER;
-  if (uppercase) chars += UPPER;
-  if (digits) chars += DIGITS;
-  if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  if (!chars) throw new Error('At least one character set needed');
-  const arr = crypto.getRandomValues(new Uint32Array(length));
-  return Array.from(arr, v => chars[v % chars.length]).join('');
-}
-
-// ─── Morse ──────────────────────────────────────────────────────────────────
-const MORSE_MAP: Record<string, string> = {
-  'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
-  'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
-  'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
-  'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
-  'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
-  '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
-  '8': '---..', '9': '----.', ' ': '/',
+const base64 = {
+  encode: (input: string): string => {
+    try { return btoa(unescape(encodeURIComponent(input))); }
+    catch { throw new Error("Invalid input for Base64 encoding"); }
+  },
+  decode: (input: string): string => {
+    try { return decodeURIComponent(escape(atob(input.trim()))); }
+    catch { throw new Error("Invalid Base64 string"); }
+  },
+  encodeURL: (input: string): string => {
+    return base64.encode(input).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  },
+  decodeURL: (input: string): string => {
+    let b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4 !== 0) b64 += "=";
+    return base64.decode(b64);
+  },
+  isValid: (input: string): boolean => {
+    return /^[A-Za-z0-9+/]*={0,2}$/.test(input) && input.length % 4 === 0;
+  },
 };
 
-const REVERSE_MORSE: Record<string, string> = {};
-for (const [k, v] of Object.entries(MORSE_MAP)) REVERSE_MORSE[v] = k;
+const url = {
+  encode: (input: string) => encodeURIComponent(input),
+  decode: (input: string) => decodeURIComponent(input),
+  buildQuery: (params: Record<string, string>) => {
+    const entries = Object.entries(params).filter(([, v]) => v);
+    return entries.length > 0 ? "?" + entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&") : "";
+  },
+  parseQuery: (qs: string) => {
+    const str = qs.startsWith("?") ? qs.slice(1) : qs;
+    const result: Record<string, string> = {};
+    str.split("&").forEach(pair => {
+      const [key, ...rest] = pair.split("=");
+      if (key) result[decodeURIComponent(key)] = decodeURIComponent(rest.join("="));
+    });
+    return result;
+  },
+};
 
-export function morseEncode(input: string): string {
-  return input.toUpperCase().split('').map(c => MORSE_MAP[c] || '').filter(Boolean).join(' ');
-}
+const hash = {
+  hashAsync: async (input: string, algorithm: string = "SHA-256"): Promise<string> => {
+    const data = new TextEncoder().encode(input);
+    const buf = await crypto.subtle.digest(algorithm, data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  },
+};
 
-export function morseDecode(input: string): string {
-  return input.trim().split(/\s*\/\s*/).map(word =>
-    word.trim().split(/\s+/).map(code => REVERSE_MORSE[code] || '').join('')
-  ).join(' ');
-}
+const jwt = {
+  decode: (token: string) => {
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new Error("Invalid JWT: must have 3 parts");
+    const decode64 = (b64url: string) => {
+      let b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4 !== 0) b64 += "=";
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    };
+    return { header: decode64(parts[0]), payload: decode64(parts[1]), signature: parts[2] };
+  },
+  isExpired: (token: string) => {
+    const { payload } = jwt.decode(token);
+    if (!payload.exp) return false;
+    return Date.now() / 1000 > payload.exp;
+  },
+  isValidFormat: (token: string) => /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*$/.test(token),
+};
 
-// ─── Roman ──────────────────────────────────────────────────────────────────
-const ROMAN_VALS: [number, string][] = [
-  [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
-  [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
-];
+const uuid = {
+  v4: (): string => {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  },
+  isValid: (input: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input),
+};
 
-export function romanToRoman(num: number): string {
-  let result = '';
-  let remaining = num;
-  for (const [value, symbol] of ROMAN_VALS) {
-    while (remaining >= value) { result += symbol; remaining -= value; }
-  }
-  return result;
-}
+const aes = {
+  encryptAsync: async (plaintext: string, secret: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const keyBytes = await crypto.subtle.digest("SHA-256", keyData);
+    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = encoder.encode(plaintext);
+    const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+    const ivB64 = btoa(String.fromCharCode(...iv));
+    const ctB64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)));
+    return `${ivB64}:${ctB64}`;
+  },
+  decryptAsync: async (encrypted: string, secret: string): Promise<string> => {
+    const parts = encrypted.split(":");
+    if (parts.length !== 2) throw new Error('Invalid format. Expected "iv:ciphertext"');
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const keyBytes = await crypto.subtle.digest("SHA-256", keyData);
+    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+    const iv = Uint8Array.from(atob(parts[0]), c => c.charCodeAt(0));
+    const ciphertext = Uint8Array.from(atob(parts[1]), c => c.charCodeAt(0));
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+    return new TextDecoder().decode(decrypted);
+  },
+};
 
-export function romanFromRoman(str: string): number {
-  const map: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
-  const upper = str.toUpperCase();
-  let result = 0;
-  for (let i = 0; i < upper.length; i++) {
-    const current = map[upper[i]];
-    const next = map[upper[i + 1]];
-    if (next && current < next) result -= current;
-    else result += current;
-  }
-  return result;
-}
+const random = {
+  string: (length: number = 16, options?: { lowercase?: boolean; uppercase?: boolean; digits?: boolean; symbols?: boolean }): string => {
+    const opts = { lowercase: true, uppercase: true, digits: true, symbols: false, ...options };
+    let chars = "";
+    if (opts.lowercase) chars += "abcdefghijklmnopqrstuvwxyz";
+    if (opts.uppercase) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (opts.digits) chars += "0123456789";
+    if (opts.symbols) chars += "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    if (!chars) throw new Error("At least one character set needed");
+    const arr = new Uint32Array(length);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, v => chars[v % chars.length]).join("");
+  },
+  int: (min: number, max: number): number => {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return min + (arr[0] % (max - min + 1));
+  },
+  hex: (length: number = 32): string => {
+    const arr = new Uint8Array(length);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, "0")).join("");
+  },
+  boolean: (): boolean => {
+    const arr = new Uint8Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] % 2 === 1;
+  },
+};
 
-// ─── Lorem ──────────────────────────────────────────────────────────────────
-const LOREM = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud'];
+const color = {
+  hexToRgb: (hex: string) => {
+    const h = hex.replace(/^#/, "");
+    return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+  },
+  rgbToHex: (r: number, g: number, b: number) => "#" + [r, g, b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0")).join(""),
+};
 
-export function loremWords(count: number = 30): string {
-  return Array.from({ length: count }, (_, i) => LOREM[i % LOREM.length]).join(' ');
-}
+const htmlEntity = {
+  encode: (input: string) => input.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] || c),
+  decode: (input: string) => input.replace(/&(amp|lt|gt|quot|#39|apos);/g, e => ({ "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&apos;": "'" })[e] || e),
+};
 
-export function loremParagraphs(count: number = 3): string {
-  return Array.from({ length: count }, () => {
-    const len = 15 + Math.floor(Math.random() * 20);
-    const words = Array.from({ length: len }, (_, i) => LOREM[i % LOREM.length]);
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-    return words.join(' ') + '.';
-  }).join('\n\n');
-}
+const numberBase = {
+  convert: (value: string, from: number, to: number) => parseInt(value, from).toString(to),
+  toBinary: (v: string | number) => Number(v).toString(2),
+  toHex: (v: string | number) => Number(v).toString(16),
+};
 
-// ─── Function registry for playground ───────────────────────────────────────
-export interface PlaygroundFunction {
-  name: string;
-  category: string;
-  params: { name: string; type: string; required: boolean; default?: string; placeholder?: string }[];
-  execute: (...args: any[]) => any;
-}
+const text = {
+  toCamelCase: (s: string) => s.replace(/(?:^\w|[A-Z]|\b\w)/g, (w, i) => i === 0 ? w.toLowerCase() : w.toUpperCase()).replace(/[\s_-]+/g, ""),
+  toSnakeCase: (s: string) => s.replace(/([a-z])([A-Z])/g, "$1_$2").replace(/[\s-]+/g, "_").toLowerCase(),
+  toKebabCase: (s: string) => s.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[\s_]+/g, "-").toLowerCase(),
+  slugify: (s: string) => s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, ""),
+  wordCount: (s: string) => s.trim() ? s.trim().split(/\s+/).length : 0,
+  charCount: (s: string, spaces?: boolean) => spaces ? s.length : s.replace(/\s/g, "").length,
+};
+
+const json = {
+  format: (s: string) => JSON.stringify(JSON.parse(s), null, 2),
+  minify: (s: string) => JSON.stringify(JSON.parse(s)),
+  validate: (s: string) => { try { JSON.parse(s); return { valid: true, error: null }; } catch (e: any) { return { valid: false, error: e.message }; } },
+};
+
+const password = {
+  generate: (length: number = 16): string => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=";
+    const arr = new Uint32Array(length);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, v => chars[v % chars.length]).join("");
+  },
+  strength: (pwd: string) => {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+    const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Very Strong", "Excellent"];
+    return { score, label: labels[Math.min(score, 6)] };
+  },
+};
+
+const morse = {
+  encode: (input: string) => {
+    const map: Record<string, string> = { A: ".-", B: "-...", C: "-.-.", D: "-..", E: ".", F: "..-.", G: "--.", H: "....", I: "..", J: ".---", K: "-.-", L: ".-..", M: "--", N: "-.", O: "---", P: ".--.", Q: "--.-", R: ".-.", S: "...", T: "-", U: "..-", V: "...-", W: ".--", X: "-..-", Y: "-.--", Z: "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----." };
+    return input.toUpperCase().split("").map(c => c === " " ? "/" : map[c] || c).join(" ");
+  },
+  decode: (input: string) => {
+    const map: Record<string, string> = { ".-": "A", "-...": "B", "-.-.": "C", "-..": "D", ".": "E", "..-.": "F", "--.": "G", "....": "H", "..": "I", ".---": "J", "-.-": "K", ".-..": "L", "--": "M", "-.": "N", "---": "O", ".--.": "P", "--.-": "Q", ".-.": "R", "...": "S", "-": "T", "..-": "U", "...-": "V", ".--": "W", "-..-": "X", "-.--": "Y", "--..": "Z" };
+    return input.split(" ").map(c => c === "/" ? " " : map[c] || c).join("");
+  },
+};
+
+const roman = {
+  toRoman: (num: number) => {
+    const map: [number, string][] = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+    let result = "";
+    for (const [val, sym] of map) { while (num >= val) { result += sym; num -= val; } }
+    return result;
+  },
+  fromRoman: (str: string) => {
+    const vals: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+    let result = 0;
+    const upper = str.toUpperCase();
+    for (let i = 0; i < upper.length; i++) {
+      const curr = vals[upper[i]];
+      const next = vals[upper[i + 1]];
+      if (next && curr < next) result -= curr;
+      else result += curr;
+    }
+    return result;
+  },
+};
+
+const cron = {
+  validate: (expr: string) => {
+    const parts = expr.trim().split(/\s+/);
+    if (parts.length !== 5) return { valid: false, error: "Must have 5 fields" };
+    return { valid: true, error: null };
+  },
+  describe: (expr: string) => {
+    const aliases: Record<string, string> = { "@yearly": "Run once a year", "@monthly": "Run once a month", "@weekly": "Run once a week", "@daily": "Run once a day", "@hourly": "Run once an hour" };
+    return aliases[expr.trim()] || expr;
+  },
+};
+
+const diff = {
+  diff: (oldText: string, newText: string) => {
+    const oldLines = oldText.split("\n");
+    const newLines = newText.split("\n");
+    let added = 0, removed = 0, unchanged = 0;
+    const maxLen = Math.max(oldLines.length, newLines.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (oldLines[i] === newLines[i]) unchanged++;
+      else { if (i < newLines.length) added++; if (i < oldLines.length) removed++; }
+    }
+    return { stats: { added, removed, unchanged } };
+  },
+  isSame: (a: string, b: string) => a === b,
+};
+
+const lorem = {
+  words: (count: number = 10) => "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod".split(" ").slice(0, count).join(" "),
+  sentences: (count: number = 3) => Array.from({ length: count }, (_, i) => `Lorem ipsum dolor sit amet consectetur adipiscing elit ${i + 1}.`).join(" "),
+  paragraphs: (count: number = 2) => Array.from({ length: count }, (_, i) => `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore paragraph ${i + 1}.`).join("\n\n"),
+};
 
 export const playgroundFunctions: PlaygroundFunction[] = [
-  { name: 'base64Encode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'Hello, World!' }], execute: (input: string) => base64Encode(input) },
-  { name: 'base64Decode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'SGVsbG8sIFdvcmxkIQ==' }], execute: (input: string) => base64Decode(input) },
-  { name: 'base64IsValid', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'SGVsbG8=' }], execute: (input: string) => base64IsValid(input) },
-  { name: 'urlEncode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'hello world' }], execute: (input: string) => urlEncode(input) },
-  { name: 'urlDecode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'hello%20world' }], execute: (input: string) => urlDecode(input) },
-  { name: 'urlBuildQuery', category: 'Encoding', params: [{ name: 'params (JSON)', type: 'string', required: true, placeholder: '{"name":"Toolmetry","v":3}' }], execute: (input: string) => urlBuildQuery(JSON.parse(input)) },
-  { name: 'urlParseQuery', category: 'Encoding', params: [{ name: 'queryString', type: 'string', required: true, placeholder: '?name=Toolmetry&v=3' }], execute: (input: string) => urlParseQuery(input) },
-  { name: 'hashGenerate', category: 'Security', params: [{ name: 'input', type: 'string', required: true, placeholder: 'hello world' }, { name: 'algorithm', type: 'string', required: false, default: 'SHA-256', placeholder: 'SHA-256' }], execute: async (input: string, algo: string) => hashGenerate(input, algo || 'SHA-256') },
-  { name: 'jwtDecode', category: 'Security', params: [{ name: 'token', type: 'string', required: true, placeholder: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.abc' }], execute: (token: string) => jwtDecode(token) },
-  { name: 'jwtIsExpired', category: 'Security', params: [{ name: 'token', type: 'string', required: true, placeholder: 'eyJhbGciOiJIUzI1NiJ9...' }], execute: (token: string) => jwtIsExpired(token) },
-  { name: 'jwtIsValidFormat', category: 'Security', params: [{ name: 'token', type: 'string', required: true, placeholder: 'eyJhbGciOiJIUzI1NiJ9...' }], execute: (token: string) => jwtIsValidFormat(token) },
-  { name: 'uuidV4', category: 'Identity', params: [], execute: () => uuidV4() },
-  { name: 'uuidIsValid', category: 'Identity', params: [{ name: 'uuid', type: 'string', required: true, placeholder: '550e8400-e29b-41d4-a716-446655440000' }], execute: (uuid: string) => uuidIsValid(uuid) },
-  { name: 'aesEncrypt', category: 'Security', params: [{ name: 'plaintext', type: 'string', required: true, placeholder: 'Secret message' }, { name: 'secret', type: 'string', required: true, placeholder: 'my-password' }], execute: (text: string, secret: string) => aesEncrypt(text, secret) },
-  { name: 'aesDecrypt', category: 'Security', params: [{ name: 'encrypted', type: 'string', required: true, placeholder: 'iv:ciphertext' }, { name: 'secret', type: 'string', required: true, placeholder: 'my-password' }], execute: (enc: string, secret: string) => aesDecrypt(enc, secret) },
-  { name: 'randomString', category: 'Utility', params: [{ name: 'length', type: 'number', required: false, default: '16', placeholder: '16' }], execute: (len: string) => randomString(parseInt(len) || 16) },
-  { name: 'randomInt', category: 'Utility', params: [{ name: 'min', type: 'number', required: true, placeholder: '1' }, { name: 'max', type: 'number', required: true, placeholder: '100' }], execute: (min: string, max: string) => randomInt(parseInt(min), parseInt(max)) },
-  { name: 'randomHex', category: 'Utility', params: [{ name: 'length', type: 'number', required: false, default: '32', placeholder: '32' }], execute: (len: string) => randomHex(parseInt(len) || 32) },
-  { name: 'randomAlphanumeric', category: 'Utility', params: [{ name: 'length', type: 'number', required: false, default: '16', placeholder: '16' }], execute: (len: string) => randomAlphanumeric(parseInt(len) || 16) },
-  { name: 'randomBoolean', category: 'Utility', params: [], execute: () => randomBoolean() },
-  { name: 'hexToRgb', category: 'Design', params: [{ name: 'hex', type: 'string', required: true, placeholder: '#3B82F6' }], execute: (hex: string) => hexToRgb(hex) },
-  { name: 'rgbToHex', category: 'Design', params: [{ name: 'r', type: 'number', required: true, placeholder: '59' }, { name: 'g', type: 'number', required: true, placeholder: '130' }, { name: 'b', type: 'number', required: true, placeholder: '246' }], execute: (r: string, g: string, b: string) => rgbToHex(parseInt(r), parseInt(g), parseInt(b)) },
-  { name: 'htmlEntityEncode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: '<script>alert("xss")</script>' }], execute: (input: string) => htmlEntityEncode(input) },
-  { name: 'htmlEntityDecode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: '&lt;hello&gt;' }], execute: (input: string) => htmlEntityDecode(input) },
-  { name: 'toBinary', category: 'Math', params: [{ name: 'value', type: 'number', required: true, placeholder: '255' }], execute: (v: string) => toBinary(v) },
-  { name: 'toHex', category: 'Math', params: [{ name: 'value', type: 'number', required: true, placeholder: '255' }], execute: (v: string) => toHex(v) },
-  { name: 'toCamelCase', category: 'Text', params: [{ name: 'input', type: 'string', required: true, placeholder: 'hello world' }], execute: (input: string) => toCamelCase(input) },
-  { name: 'toSnakeCase', category: 'Text', params: [{ name: 'input', type: 'string', required: true, placeholder: 'helloWorld' }], execute: (input: string) => toSnakeCase(input) },
-  { name: 'toKebabCase', category: 'Text', params: [{ name: 'input', type: 'string', required: true, placeholder: 'helloWorld' }], execute: (input: string) => toKebabCase(input) },
-  { name: 'slugify', category: 'Text', params: [{ name: 'input', type: 'string', required: true, placeholder: 'Hello World! 123' }], execute: (input: string) => slugify(input) },
-  { name: 'wordCount', category: 'Text', params: [{ name: 'input', type: 'string', required: true, placeholder: 'hello world foo bar' }], execute: (input: string) => wordCount(input) },
-  { name: 'jsonFormat', category: 'Data', params: [{ name: 'input', type: 'string', required: true, placeholder: '{"name":"Toolmetry","v":3}' }], execute: (input: string) => jsonFormat(input) },
-  { name: 'jsonMinify', category: 'Data', params: [{ name: 'input', type: 'string', required: true, placeholder: '{ "name" : "Toolmetry" }' }], execute: (input: string) => jsonMinify(input) },
-  { name: 'jsonValidate', category: 'Data', params: [{ name: 'input', type: 'string', required: true, placeholder: '{"valid":true}' }], execute: (input: string) => jsonValidate(input) },
-  { name: 'passwordGenerate', category: 'Security', params: [{ name: 'length', type: 'number', required: false, default: '16', placeholder: '16' }], execute: (len: string) => passwordGenerate({ length: parseInt(len) || 16 }) },
-  { name: 'morseEncode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: 'HELLO WORLD' }], execute: (input: string) => morseEncode(input) },
-  { name: 'morseDecode', category: 'Encoding', params: [{ name: 'input', type: 'string', required: true, placeholder: '.... . .-.. .-.. ---' }], execute: (input: string) => morseDecode(input) },
-  { name: 'romanToRoman', category: 'Math', params: [{ name: 'num', type: 'number', required: true, placeholder: '2024' }], execute: (num: string) => romanToRoman(parseInt(num)) },
-  { name: 'romanFromRoman', category: 'Math', params: [{ name: 'str', type: 'string', required: true, placeholder: 'MMXXIV' }], execute: (str: string) => romanFromRoman(str) },
-  { name: 'loremWords', category: 'Content', params: [{ name: 'count', type: 'number', required: false, default: '10', placeholder: '10' }], execute: (count: string) => loremWords(parseInt(count) || 10) },
-  { name: 'loremParagraphs', category: 'Content', params: [{ name: 'count', type: 'number', required: false, default: '2', placeholder: '2' }], execute: (count: string) => loremParagraphs(parseInt(count) || 2) },
+  { tool: "base64", name: "base64Encode", params: [{ name: "input", placeholder: "Hello World!" }], execute: async ([input]) => base64.encode(input) },
+  { tool: "base64", name: "base64Decode", params: [{ name: "input", placeholder: "SGVsbG8gV29ybGQh" }], execute: async ([input]) => base64.decode(input) },
+  { tool: "base64", name: "base64EncodeURL", params: [{ name: "input", placeholder: "hello+world/data" }], execute: async ([input]) => base64.encodeURL(input) },
+  { tool: "base64", name: "base64DecodeURL", params: [{ name: "input", placeholder: "aGVsbG8rd29ybGQvZGF0YQ" }], execute: async ([input]) => base64.decodeURL(input) },
+  { tool: "url", name: "urlEncode", params: [{ name: "input", placeholder: "hello world" }], execute: async ([input]) => url.encode(input) },
+  { tool: "url", name: "urlDecode", params: [{ name: "input", placeholder: "hello%20world" }], execute: async ([input]) => url.decode(input) },
+  { tool: "url", name: "urlBuildQuery", params: [{ name: "key1", placeholder: "name", default: "name" }, { name: "value1", placeholder: "toolmetry", default: "toolmetry" }], execute: async ([k, v]) => url.buildQuery({ [k]: v }) },
+  { tool: "hash", name: "hashAsync (SHA-256)", params: [{ name: "input", placeholder: "hello world" }], execute: async ([input]) => hash.hashAsync(input) },
+  { tool: "hash", name: "hashAsync (SHA-1)", params: [{ name: "input", placeholder: "hello world" }], execute: async ([input]) => hash.hashAsync(input, "SHA-1") },
+  { tool: "hash", name: "hashAsync (SHA-512)", params: [{ name: "input", placeholder: "hello world" }], execute: async ([input]) => hash.hashAsync(input, "SHA-512") },
+  { tool: "jwt", name: "jwtDecode", params: [{ name: "token", placeholder: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.abc" }], execute: async ([token]) => JSON.stringify(jwt.decode(token), null, 2) },
+  { tool: "jwt", name: "jwtIsValidFormat", params: [{ name: "token", placeholder: "a.b.c" }], execute: async ([token]) => String(jwt.isValidFormat(token)) },
+  { tool: "uuid", name: "uuidV4", params: [], execute: async () => uuid.v4() },
+  { tool: "uuid", name: "uuidIsValid", params: [{ name: "uuid", placeholder: "550e8400-e29b-41d4-a716-446655440000" }], execute: async ([id]) => String(uuid.isValid(id)) },
+  { tool: "encrypt", name: "aesEncryptAsync", params: [{ name: "plaintext", placeholder: "Secret message" }, { name: "secret", placeholder: "my-password" }], execute: async ([text, secret]) => aes.encryptAsync(text, secret) },
+  { tool: "encrypt", name: "aesDecryptAsync", params: [{ name: "encrypted", placeholder: "iv:ciphertext" }, { name: "secret", placeholder: "my-password" }], execute: async ([enc, secret]) => aes.decryptAsync(enc, secret) },
+  { tool: "random", name: "randomString", params: [{ name: "length", placeholder: "16", default: "16" }], execute: async ([len]) => random.string(Number(len) || 16) },
+  { tool: "random", name: "randomInt", params: [{ name: "min", placeholder: "1", default: "1" }, { name: "max", placeholder: "100", default: "100" }], execute: async ([min, max]) => String(random.int(Number(min), Number(max))) },
+  { tool: "random", name: "randomHex", params: [{ name: "length", placeholder: "32", default: "32" }], execute: async ([len]) => random.hex(Number(len) || 32) },
+  { tool: "random", name: "randomBoolean", params: [], execute: async () => String(random.boolean()) },
+  { tool: "color", name: "hexToRgb", params: [{ name: "hex", placeholder: "#ff0000" }], execute: async ([hex]) => JSON.stringify(color.hexToRgb(hex)) },
+  { tool: "color", name: "rgbToHex", params: [{ name: "r", placeholder: "255" }, { name: "g", placeholder: "0" }, { name: "b", placeholder: "0" }], execute: async ([r, g, b]) => color.rgbToHex(Number(r), Number(g), Number(b)) },
+  { tool: "htmlEntity", name: "htmlEntityEncode", params: [{ name: "input", placeholder: '<div class="test">' }], execute: async ([input]) => htmlEntity.encode(input) },
+  { tool: "htmlEntity", name: "htmlEntityDecode", params: [{ name: "input", placeholder: "&lt;div&gt;" }], execute: async ([input]) => htmlEntity.decode(input) },
+  { tool: "numberBase", name: "toBinary", params: [{ name: "value", placeholder: "255" }], execute: async ([v]) => numberBase.toBinary(v) },
+  { tool: "numberBase", name: "toHex", params: [{ name: "value", placeholder: "255" }], execute: async ([v]) => numberBase.toHex(v) },
+  { tool: "text", name: "toCamelCase", params: [{ name: "input", placeholder: "hello world" }], execute: async ([input]) => text.toCamelCase(input) },
+  { tool: "text", name: "toSnakeCase", params: [{ name: "input", placeholder: "helloWorld" }], execute: async ([input]) => text.toSnakeCase(input) },
+  { tool: "text", name: "toKebabCase", params: [{ name: "input", placeholder: "helloWorld" }], execute: async ([input]) => text.toKebabCase(input) },
+  { tool: "text", name: "slugify", params: [{ name: "input", placeholder: "Hello World! 123" }], execute: async ([input]) => text.slugify(input) },
+  { tool: "json", name: "jsonFormat", params: [{ name: "input", placeholder: '{"a":1}' }], execute: async ([input]) => json.format(input) },
+  { tool: "json", name: "jsonValidate", params: [{ name: "input", placeholder: '{"a":1}' }], execute: async ([input]) => JSON.stringify(json.validate(input)) },
+  { tool: "password", name: "passwordGenerate", params: [{ name: "length", placeholder: "16", default: "16" }], execute: async ([len]) => password.generate(Number(len) || 16) },
+  { tool: "password", name: "passwordStrength", params: [{ name: "password", placeholder: "MyP@ss123" }], execute: async ([pwd]) => JSON.stringify(password.strength(pwd)) },
+  { tool: "morse", name: "morseEncode", params: [{ name: "input", placeholder: "SOS" }], execute: async ([input]) => morse.encode(input) },
+  { tool: "morse", name: "morseDecode", params: [{ name: "input", placeholder: "... --- ..." }], execute: async ([input]) => morse.decode(input) },
+  { tool: "roman", name: "toRoman", params: [{ name: "num", placeholder: "42" }], execute: async ([num]) => roman.toRoman(Number(num)) },
+  { tool: "roman", name: "fromRoman", params: [{ name: "str", placeholder: "XLII" }], execute: async ([str]) => String(roman.fromRoman(str)) },
+  { tool: "cron", name: "cronValidate", params: [{ name: "expression", placeholder: "0 0 * * *" }], execute: async ([expr]) => JSON.stringify(cron.validate(expr)) },
+  { tool: "diff", name: "diffIsSame", params: [{ name: "text1", placeholder: "hello" }, { name: "text2", placeholder: "world" }], execute: async ([a, b]) => String(diff.isSame(a, b)) },
+  { tool: "lorem", name: "loremWords", params: [{ name: "count", placeholder: "10", default: "10" }], execute: async ([count]) => lorem.words(Number(count) || 10) },
+  { tool: "lorem", name: "loremParagraphs", params: [{ name: "count", placeholder: "2", default: "2" }], execute: async ([count]) => lorem.paragraphs(Number(count) || 2) },
 ];

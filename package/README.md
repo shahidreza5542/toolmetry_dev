@@ -1,11 +1,6 @@
 # toolmetry
 
-> A comprehensive developer tools library for JavaScript/TypeScript — Base64, URL encoding, hashing, JWT, UUID, AES-256 encryption, random generation, color conversion, and more.
-
-[![npm version](https://img.shields.io/npm/v/toolmetry.svg)](https://www.npmjs.com/package/toolmetry)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-## Install
+A comprehensive developer tools library for Node.js and browsers. Zero dependencies, full TypeScript support, dual ESM/CJS module system.
 
 ```bash
 npm i toolmetry
@@ -14,43 +9,48 @@ npm i toolmetry
 ## Quick Start
 
 ```javascript
+// CommonJS
 const toolmetry = require('toolmetry');
 
-// Or destructure only what you need
-const { base64Encode, uuidV4, hashGenerate, aesEncrypt, randomString } = require('toolmetry');
+// ES Modules
+import toolmetry from 'toolmetry';
+// or named imports
+import { base64Encode, uuidV4, hashGenerate, aesEncrypt } from 'toolmetry';
 ```
 
-## Modules
+## Modules (18 total)
 
-### Base64 Encode/Decode
+| Module | Functions | Example |
+|--------|-----------|---------|
+| **base64** | encode, decode, encodeURL, decodeURL, isValid, encodeBuffer, decodeToBuffer | `toolmetry.base64Encode('hello')` |
+| **url** | encode, decode, encodeAll, buildQuery, parseQuery | `toolmetry.urlEncode('hello world')` |
+| **hash** | hash, hashAsync, hmac, hashAll, ALGORITHMS | `toolmetry.hashGenerate('data', 'sha256')` |
+| **jwt** | decode, decodeHeader, decodePayload, isExpired, isValidFormat, getAlgorithm, timeUntilExpiry | `toolmetry.jwtDecode(token)` |
+| **uuid** | v4, v4Short, v4Batch, isValid, getVersion, nil, isNil | `toolmetry.uuidV4()` |
+| **encrypt** | encrypt, decrypt, encryptAsync, decryptAsync | `toolmetry.aesEncrypt('secret', 'key')` |
+| **random** | string, int, hex, alphanumeric, pick, shuffle, boolean, float | `toolmetry.randomString(16)` |
+| **color** | hexToRgb, rgbToHex, rgbToHsl, hslToRgb, hexToHsl, hslToHex, convert, isValidHex, lighten, darken | `toolmetry.hexToRgb('#ff0000')` |
+| **htmlEntity** | encode, decode, encodeAll, encodeChars | `toolmetry.htmlEntityEncode('<div>')` |
+| **numberBase** | convert, toBinary, toOctal, toHex, fromBinary, fromHex, convertAll | `toolmetry.toBinary(255)` |
+| **text** | toCamelCase, toPascalCase, toSnakeCase, toKebabCase, toConstantCase, slugify, wordCount, charCount, reverse, truncate, removeExtraWhitespace, removeLineBreaks, escapeRegex | `toolmetry.toCamelCase('hello world')` |
+| **json** | format, minify, validate, getType, stats, flatten | `toolmetry.jsonFormat('{"a":1}')` |
+| **password** | generate, passphrase, strength, generateBatch | `toolmetry.passwordGenerate({length: 20})` |
+| **morse** | encode, decode, isValid, MORSE_MAP | `toolmetry.morseEncode('SOS')` |
+| **roman** | toRoman, fromRoman, isValidRoman | `toolmetry.romanToRoman(42)` |
+| **cron** | validate, describe, ALIASES | `toolmetry.cronValidate('0 0 * * *')` |
+| **diff** | diff, unifiedDiff, isSame | `toolmetry.diffCheck('a', 'b')` |
+| **lorem** | words, sentences, paragraphs | `toolmetry.loremParagraphs(3)` |
+
+## Usage Examples
+
+### Base64
 
 ```javascript
-const { base64Encode, base64Decode } = require('toolmetry');
+const { base64Encode, base64Decode, base64EncodeURL } = require('toolmetry');
 
-const encoded = base64Encode('Hello, Toolmetry!');
-// "SGVsbG8sIFRvb2xtZXRyeSE="
-
-const decoded = base64Decode(encoded);
-// "Hello, Toolmetry!"
-
-// URL-safe variants
-const urlSafe = toolmetry.base64EncodeURL('hello+world/test=data');
-const original = toolmetry.base64DecodeURL(urlSafe);
-
-// Validate
-toolmetry.base64IsValid('SGVsbG8='); // true
-```
-
-### URL Encoder/Decoder
-
-```javascript
-const { urlEncode, urlDecode, urlBuildQuery, urlParseQuery } = require('toolmetry');
-
-urlEncode('hello world'); // "hello%20world"
-urlDecode('hello%20world'); // "hello world"
-
-const qs = urlBuildQuery({ name: 'Toolmetry', v: 2 }); // "?name=Toolmetry&v=2"
-const params = urlParseQuery(qs); // { name: "Toolmetry", v: "2" }
+base64Encode('hello world');     // 'aGVsbG8gd29ybGQ='
+base64Decode('aGVsbG8gd29ybGQ='); // 'hello world'
+base64EncodeURL('hello world');  // 'aGVsbG8gd29ybGQ' (no padding, URL-safe)
 ```
 
 ### Hash Generator
@@ -58,39 +58,31 @@ const params = urlParseQuery(qs); // { name: "Toolmetry", v: "2" }
 ```javascript
 const { hashGenerate, hashAll, hmacGenerate } = require('toolmetry');
 
-hashGenerate('hello world'); // SHA-256 hash (default)
-hashGenerate('hello', 'md5'); // MD5 hash
-hashGenerate('hello', 'sha512', 'base64'); // SHA-512 in base64
-
-const allHashes = hashAll('hello');
-// { md5: '...', sha1: '...', sha256: '...', sha384: '...', sha512: '...' }
-
+hashGenerate('hello', 'sha256');     // SHA-256 hash
+hashGenerate('hello', 'md5');        // MD5 hash
+hashAll('hello');                     // { md5: '...', sha1: '...', sha256: '...', sha384: '...', sha512: '...' }
 hmacGenerate('data', 'secret', 'sha256'); // HMAC-SHA256
 ```
 
 ### JWT Decoder
 
 ```javascript
-const { jwtDecode, jwtIsExpired, jwtGetAlgorithm } = require('toolmetry');
+const { jwtDecode, jwtIsExpired } = require('toolmetry');
 
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
-
-const decoded = jwtDecode(token);
-// { header: { alg: "HS256", typ: "JWT" }, payload: { sub: "1234567890" }, signature: "..." }
-
-jwtIsExpired(token); // true or false
-jwtGetAlgorithm(token); // "HS256"
+const decoded = jwtDecode('eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123');
+console.log(decoded.header);   // { alg: 'HS256' }
+console.log(decoded.payload);  // { sub: '1234567890' }
+jwtIsExpired(token);           // true or false
 ```
 
 ### UUID Generator
 
 ```javascript
-const { uuidV4, uuidV4Batch, uuidIsValid } = require('toolmetry');
+const { uuidV4, uuidV4Short, uuidV4Batch } = require('toolmetry');
 
-const id = uuidV4(); // "550e8400-e29b-41d4-a716-446655440000"
-const short = toolmetry.uuidV4Short(); // "550e8400e29b41d4a716446655440000"
-const batch = uuidV4Batch(5); // Array of 5 UUIDs
-uuidIsValid(id); // true
+uuidV4();        // '550e8400-e29b-41d4-a716-446655440000'
+uuidV4Short();   // '550e8400e29b41d4a716446655440000'
+uuidV4Batch(5);  // ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5']
 ```
 
 ### AES-256 Encrypt/Decrypt
@@ -98,172 +90,100 @@ uuidIsValid(id); // true
 ```javascript
 const { aesEncrypt, aesDecrypt } = require('toolmetry');
 
-const encrypted = aesEncrypt('Secret message', 'my-password');
-// "iv:authTag:ciphertext" (Base64 encoded)
-
+const encrypted = aesEncrypt('my secret text', 'my-password');
 const decrypted = aesDecrypt(encrypted, 'my-password');
-// "Secret message"
+console.log(decrypted); // 'my secret text'
 
-// Async variants for browser (SubtleCrypto)
-const enc = await toolmetry.aesEncryptAsync('Hello', 'key');
-const dec = await toolmetry.aesDecryptAsync(enc, 'key');
+// Browser (async)
+const encrypted = await aesEncryptAsync('my secret text', 'my-password');
+const decrypted = await aesDecryptAsync(encrypted, 'my-password');
 ```
 
 ### Random Generator
 
 ```javascript
-const { randomString, randomInt, randomHex, randomAlphanumeric } = require('toolmetry');
+const { randomString, randomInt, randomHex, randomBoolean } = require('toolmetry');
 
-randomString(16); // "aB3dE7fG9hJ2kL5m"
-randomString(20, { symbols: true }); // "aB3!dE7@fG9#hJ2$kL5m"
-randomInt(1, 100); // 42
-randomHex(32); // "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
-randomAlphanumeric(12); // "aB3dE7fG9hJ2"
-
-toolmetry.randomPick(['a', 'b', 'c']); // Random element
-toolmetry.randomShuffle([1, 2, 3, 4, 5]); // Shuffled array
-toolmetry.randomBoolean(); // true or false
-toolmetry.randomFloat(0, 1, 4); // 0.5234
+randomString(16);                           // 'aB3dEfGhIjKlMnOp'
+randomString(16, { symbols: true });        // 'aB3!dE@fG#hI$jK%'
+randomInt(1, 100);                          // 42
+randomHex(32);                              // 'a1b2c3d4...'
+randomBoolean();                            // true or false
 ```
 
 ### Color Converter
 
 ```javascript
-const { hexToRgb, rgbToHex, colorLighten, colorDarken } = require('toolmetry');
+const { hexToRgb, rgbToHex, colorConvert, colorLighten } = require('toolmetry');
 
-hexToRgb('#00236F'); // { r: 0, g: 35, b: 111 }
-rgbToHex(0, 35, 111); // "#00236f"
-colorLighten('#00236F', 20); // Lighter shade
-colorDarken('#00236F', 20); // Darker shade
-toolmetry.colorConvert('#ff0000'); // All formats
-```
-
-### HTML Entity Encoder/Decoder
-
-```javascript
-const { htmlEntityEncode, htmlEntityDecode } = require('toolmetry');
-
-htmlEntityEncode('<script>alert("xss")</script>');
-// "&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;"
-
-htmlEntityDecode('&lt;hello&gt;'); // "<hello>"
-```
-
-### Number Base Converter
-
-```javascript
-const { toBinary, toHex, convertAllBases } = require('toolmetry');
-
-toBinary(255); // "11111111"
-toHex(255); // "FF"
-convertAllBases(255); // { decimal: "255", binary: "11111111", octal: "377", hex: "FF" }
-```
-
-### Text Utilities
-
-```javascript
-const { toCamelCase, toSnakeCase, slugify, wordCount } = require('toolmetry');
-
-toCamelCase('hello world'); // "helloWorld"
-toSnakeCase('helloWorld'); // "hello_world"
-toKebabCase('hello world'); // "hello-world"
-slugify('Hello World! 123'); // "hello-world-123"
-wordCount('hello world foo'); // 3
-toolmetry.truncate('Long text here', 10); // "Long te..."
-```
-
-### JSON Tools
-
-```javascript
-const { jsonFormat, jsonValidate, jsonMinify } = require('toolmetry');
-
-jsonFormat('{"name":"Toolmetry","v":3}', 2);
-// Prettified JSON with 2-space indent
-
-jsonValidate('{invalid}'); // { valid: false, error: "...", position: { line: 1, column: 2 } }
-jsonMinify('{ "a" : 1 }'); // '{"a":1}'
+hexToRgb('#ff0000');          // { r: 255, g: 0, b: 0 }
+rgbToHex(255, 0, 0);         // '#ff0000'
+colorConvert('#ff0000');      // { hex, rgb, hsl, cssRgb, cssHsl }
+colorLighten('#333333', 20);  // '#5c5c5c'
 ```
 
 ### Password Generator
 
 ```javascript
-const { passwordGenerate, passwordStrength } = require('toolmetry');
+const { passwordGenerate, passwordPassphrase, passwordStrength } = require('toolmetry');
 
-passwordGenerate({ length: 20, symbols: true }); // "x8#Km2@pL9!nQ4&wR7"
-passwordStrength('mypassword123'); // { score: 3, label: "Fair", suggestions: [...] }
-toolmetry.passwordPassphrase({ words: 4, capitalize: true }); // "Brave-Cloud-Eagle-Flame"
+passwordGenerate({ length: 20, symbols: true });
+passwordPassphrase({ words: 4, separator: '-', capitalize: true });
+passwordStrength('MyP@ss123');  // { score: 5, label: 'Strong', suggestions: [] }
 ```
 
-### Morse Code
+## Import Styles
+
+### CommonJS
 
 ```javascript
-const { morseEncode, morseDecode } = require('toolmetry');
+const toolmetry = require('toolmetry');
 
-morseEncode('HELLO WORLD'); // ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
-morseDecode('.... . .-.. .-.. ---'); // "HELLO"
+// Namespace access
+toolmetry.base64.encode('hello');
+toolmetry.uuid.v4();
+
+// Flat function access
+toolmetry.base64Encode('hello');
+toolmetry.uuidV4();
 ```
 
-### Roman Numerals
+### ES Modules
 
 ```javascript
-const { romanToRoman, romanFromRoman } = require('toolmetry');
+import toolmetry from 'toolmetry';
 
-romanToRoman(2024); // "MMXXIV"
-romanFromRoman('XIV'); // 14
+// Namespace access
+toolmetry.base64.encode('hello');
+toolmetry.uuid.v4();
+
+// Named imports
+import { base64Encode, uuidV4, hashGenerate } from 'toolmetry';
+base64Encode('hello');
+uuidV4();
 ```
 
-### Cron Validator
+## Features
 
-```javascript
-const { cronValidate, cronDescribe } = require('toolmetry');
+- **Zero dependencies** — Pure JavaScript, no external packages
+- **Dual CJS/ESM** — Works with both `require()` and `import`
+- **TypeScript support** — Full type declarations included
+- **Browser compatible** — SubtleCrypto fallback for hash, encrypt, uuid, random
+- **Cryptographically secure** — Uses `crypto.randomInt` / `crypto.getRandomValues` for randomness
+- **Tree-shakeable** — `sideEffects: false` for optimal bundling
+- **Well-tested** — Comprehensive error handling and input validation
 
-cronValidate('0 6 * * *'); // { valid: true, error: null, fields: {...} }
-cronDescribe('@daily'); // "Runs once a day (at midnight)"
-```
+## Requirements
 
-### Diff Checker
-
-```javascript
-const { diffCheck, diffUnified } = require('toolmetry');
-
-const result = diffCheck('hello world', 'hello earth');
-// { lines: [...], stats: { added: 1, removed: 1, unchanged: 1 } }
-
-diffUnified('old text', 'new text'); // Unified diff string
-```
-
-### Lorem Ipsum
-
-```javascript
-const { loremWords, loremParagraphs } = require('toolmetry');
-
-loremWords(10); // 10 words of lorem ipsum
-loremParagraphs(3); // 3 paragraphs
-```
-
-## Full API Reference
-
-| Module | Functions |
-|--------|-----------|
-| **Base64** | `base64Encode`, `base64Decode`, `base64EncodeURL`, `base64DecodeURL`, `base64IsValid`, `base64EncodeBuffer`, `base64DecodeToBuffer` |
-| **URL** | `urlEncode`, `urlDecode`, `urlBuildQuery`, `urlParseQuery` |
-| **Hash** | `hashGenerate`, `hashAsync`, `hmacGenerate`, `hashAll` |
-| **JWT** | `jwtDecode`, `jwtDecodeHeader`, `jwtDecodePayload`, `jwtIsExpired`, `jwtIsValidFormat`, `jwtGetAlgorithm`, `jwtTimeUntilExpiry` |
-| **UUID** | `uuidV4`, `uuidV4Short`, `uuidV4Batch`, `uuidIsValid`, `uuidGetVersion`, `uuidNil`, `uuidIsNil` |
-| **AES-256** | `aesEncrypt`, `aesDecrypt`, `aesEncryptAsync`, `aesDecryptAsync` |
-| **Random** | `randomString`, `randomInt`, `randomHex`, `randomAlphanumeric`, `randomPick`, `randomShuffle`, `randomBoolean`, `randomFloat` |
-| **Color** | `hexToRgb`, `rgbToHex`, `rgbToHsl`, `hslToRgb`, `hexToHsl`, `hslToHex`, `colorConvert`, `colorIsValidHex`, `colorLighten`, `colorDarken` |
-| **HTML Entity** | `htmlEntityEncode`, `htmlEntityDecode`, `htmlEntityEncodeAll`, `htmlEntityEncodeChars` |
-| **Number Base** | `baseConvert`, `toBinary`, `toOctal`, `toHex`, `fromBinary`, `fromHex`, `convertAllBases` |
-| **Text** | `toCamelCase`, `toPascalCase`, `toSnakeCase`, `toKebabCase`, `toConstantCase`, `slugify`, `wordCount`, `charCount`, `reverse`, `truncate`, `removeExtraWhitespace`, `removeLineBreaks`, `escapeRegex` |
-| **JSON** | `jsonFormat`, `jsonMinify`, `jsonValidate`, `jsonGetType`, `jsonStats`, `jsonFlatten` |
-| **Password** | `passwordGenerate`, `passwordPassphrase`, `passwordStrength`, `passwordGenerateBatch` |
-| **Morse** | `morseEncode`, `morseDecode`, `morseIsValid` |
-| **Roman** | `romanToRoman`, `romanFromRoman`, `romanIsValid` |
-| **Cron** | `cronValidate`, `cronDescribe` |
-| **Diff** | `diffCheck`, `diffUnified`, `diffIsSame` |
-| **Lorem** | `loremWords`, `loremSentences`, `loremParagraphs` |
+- Node.js >= 16.0.0 (for CJS sync crypto operations)
+- Modern browser (for async SubtleCrypto operations)
 
 ## License
 
 MIT © ToolmetryAI
+
+## Links
+
+- [npm](https://www.npmjs.com/package/toolmetry)
+- [GitHub](https://github.com/toolmetryai/toolmetry-npm)
+- [Homepage](https://toolmetryai.com)

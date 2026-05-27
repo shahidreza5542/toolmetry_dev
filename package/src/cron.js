@@ -1,9 +1,12 @@
 /**
- * toolmetryai — Cron Expression Validator
- * Parse and validate cron expressions.
+ * toolmetry — Cron Expression Validator
+ * Validate and describe cron expressions.
+ * @module cron
  */
 
-const CRON_ALIASES = {
+'use strict';
+
+var ALIASES = {
   '@yearly': '0 0 1 1 *',
   '@annually': '0 0 1 1 *',
   '@monthly': '0 0 1 * *',
@@ -13,169 +16,156 @@ const CRON_ALIASES = {
   '@hourly': '0 * * * *',
 };
 
-const FIELD_NAMES = ['minute', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'];
-
-const FIELD_RANGES = {
-  minute: { min: 0, max: 59 },
-  hour: { min: 0, max: 23 },
-  dayOfMonth: { min: 1, max: 31 },
-  month: { min: 1, max: 12 },
-  dayOfWeek: { min: 0, max: 7 }, // 0 and 7 both = Sunday
+var MONTH_NAMES = {
+  'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+  'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
 };
 
-const MONTH_NAMES = {
-  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
-  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+var DAY_NAMES = {
+  'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6,
 };
 
-const DAY_NAMES = {
-  sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
-};
+var FIELD_NAMES = ['minute', 'hour', 'day of month', 'month', 'day of week'];
 
-/**
- * Validate a cron expression.
- * @param {string} expression - The cron expression to validate.
- * @returns {{ valid: boolean, error: string|null, fields: object|null }}
- */
+var FIELD_RANGES = [
+  { min: 0, max: 59 },
+  { min: 0, max: 23 },
+  { min: 1, max: 31 },
+  { min: 1, max: 12 },
+  { min: 0, max: 7 },
+];
+
 function validate(expression) {
   if (typeof expression !== 'string') {
     return { valid: false, error: 'Expression must be a string', fields: null };
   }
 
-  const trimmed = expression.trim();
+  var expr = expression.trim();
 
-  // Check aliases
-  if (trimmed.startsWith('@')) {
-    if (CRON_ALIASES[trimmed]) {
-      return { valid: true, error: null, fields: { alias: trimmed, expanded: CRON_ALIASES[trimmed] } };
-    }
-    return { valid: false, error: `Unknown alias: ${trimmed}`, fields: null };
+  if (ALIASES[expr]) {
+    return { valid: true, error: null, fields: { alias: expr, expanded: ALIASES[expr] } };
   }
 
-  const parts = trimmed.split(/\s+/);
-
-  if (parts.length < 5 || parts.length > 6) {
-    return { valid: false, error: `Expected 5 or 6 fields, got ${parts.length}`, fields: null };
+  var parts = expr.split(/\s+/);
+  if (parts.length !== 5) {
+    return { valid: false, error: 'Cron expression must have exactly 5 fields, got ' + parts.length, fields: null };
   }
 
-  const hasSeconds = parts.length === 6;
-  const fields = {};
-
-  for (let i = 0; i < 5; i++) {
-    const partIndex = hasSeconds ? i + 1 : i;
-    const fieldName = FIELD_NAMES[i];
-    const range = FIELD_RANGES[fieldName];
-    const result = _parseField(parts[partIndex], range, fieldName);
-
+  var fields = {};
+  for (var i = 0; i < 5; i++) {
+    var result = _validateField(parts[i], i);
     if (!result.valid) {
-      return { valid: false, error: `Field "${fieldName}": ${result.error}`, fields: null };
+      return { valid: false, error: 'Field ' + FIELD_NAMES[i] + ': ' + result.error, fields: null };
     }
-    fields[fieldName] = result.values;
+    fields[FIELD_NAMES[i]] = result.values;
   }
 
-  if (hasSeconds) {
-    const secondsResult = _parseField(parts[0], { min: 0, max: 59 }, 'second');
-    if (!secondsResult.valid) {
-      return { valid: false, error: `Field "second": ${secondsResult.error}`, fields: null };
-    }
-    fields.second = secondsResult.values;
-  }
-
-  return { valid: true, error: null, fields };
+  return { valid: true, error: null, fields: fields };
 }
 
-/**
- * Get a human-readable description of a cron expression.
- * @param {string} expression - The cron expression.
- * @returns {string} Human-readable description.
- */
 function describe(expression) {
-  const result = validate(expression);
-  if (!result.valid) return `Invalid: ${result.error}`;
+  var result = validate(expression);
+  if (!result.valid) return 'Invalid: ' + result.error;
 
-  if (result.fields.alias) {
-    const descriptions = {
-      '@yearly': 'Runs once a year (January 1st at midnight)',
-      '@annually': 'Runs once a year (January 1st at midnight)',
-      '@monthly': 'Runs once a month (1st at midnight)',
-      '@weekly': 'Runs once a week (Sunday at midnight)',
-      '@daily': 'Runs once a day (at midnight)',
-      '@midnight': 'Runs once a day (at midnight)',
-      '@hourly': 'Runs once an hour (at minute 0)',
+  var expr = expression.trim();
+  if (ALIASES[expr]) {
+    var descriptions = {
+      '@yearly': 'Run once a year (midnight, January 1st)',
+      '@annually': 'Run once a year (midnight, January 1st)',
+      '@monthly': 'Run once a month (midnight, 1st)',
+      '@weekly': 'Run once a week (midnight, Sunday)',
+      '@daily': 'Run once a day (midnight)',
+      '@midnight': 'Run once a day (midnight)',
+      '@hourly': 'Run once an hour',
     };
-    return descriptions[result.fields.alias] || result.fields.alias;
+    return descriptions[expr] || expr;
   }
 
-  const f = result.fields;
-  const parts = [];
-
-  if (f.minute && f.minute.length === 1 && f.minute[0] === 0) parts.push('at minute 0');
-  else if (f.minute && f.minute.length > 1) parts.push(`at minutes ${f.minute.join(', ')}`);
-
-  if (f.hour && f.hour.length === 1) parts.push(`at hour ${f.hour[0]}`);
-  else if (f.hour && f.hour.length > 1) parts.push(`at hours ${f.hour.join(', ')}`);
-
-  return `Cron: ${expression}` + (parts.length > 0 ? ` (${parts.join(', ')})` : '');
+  var parts = expr.split(/\s+/);
+  var desc = [];
+  desc.push('Minute: ' + _describeField(parts[0], 0));
+  desc.push('Hour: ' + _describeField(parts[1], 1));
+  desc.push('Day: ' + _describeField(parts[2], 2));
+  desc.push('Month: ' + _describeField(parts[3], 3));
+  desc.push('Weekday: ' + _describeField(parts[4], 4));
+  return desc.join(', ');
 }
 
-/**
- * Expand a cron field value into individual numbers.
- */
-function _parseField(field, range, fieldName) {
-  const values = new Set();
+function _validateField(field, index) {
+  var range = FIELD_RANGES[index];
+  var values = [];
 
-  // Handle month/day names
-  let normalized = field.toLowerCase();
-  if (fieldName === 'month') {
-    for (const [name, num] of Object.entries(MONTH_NAMES)) {
-      normalized = normalized.replace(new RegExp(name, 'gi'), String(num));
-    }
-  }
-  if (fieldName === 'dayOfWeek') {
-    for (const [name, num] of Object.entries(DAY_NAMES)) {
-      normalized = normalized.replace(new RegExp(name, 'gi'), String(num));
-    }
-  }
+  var parts = field.split(',');
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i].toLowerCase();
 
-  const segments = normalized.split(',');
+    part = _replaceNames(part, index);
 
-  for (const segment of segments) {
-    const stepMatch = segment.match(/^(.+)\/(\d+)$/);
-    const step = stepMatch ? parseInt(stepMatch[2], 10) : 1;
-    const rangePart = stepMatch ? stepMatch[1] : segment;
-
-    let start, end;
-
-    if (rangePart === '*') {
-      start = range.min;
-      end = range.max;
-    } else if (rangePart.includes('-')) {
-      const [s, e] = rangePart.split('-').map(Number);
-      start = s;
-      end = e;
-    } else {
-      start = end = parseInt(rangePart, 10);
+    if (part === '*') {
+      for (var v = range.min; v <= range.max; v++) values.push(v);
+      continue;
     }
 
-    if (isNaN(start) || isNaN(end)) {
-      return { valid: false, error: `Invalid value in "${segment}"`, values: null };
-    }
+    var stepMatch = part.match(/^(.+)\/(\d+)$/);
+    if (stepMatch) {
+      var base = stepMatch[1];
+      var step = parseInt(stepMatch[2], 10);
+      if (step < 1) return { valid: false, error: 'Step must be at least 1' };
 
-    for (let i = start; i <= end; i += step) {
-      if (i < range.min || i > range.max) {
-        return { valid: false, error: `Value ${i} out of range (${range.min}-${range.max})`, values: null };
+      var rangeMatch = base.match(/^(\d+)-(\d+)$/);
+      var start, end;
+      if (rangeMatch) {
+        start = parseInt(rangeMatch[1], 10);
+        end = parseInt(rangeMatch[2], 10);
+      } else if (base === '*') {
+        start = range.min;
+        end = range.max;
+      } else {
+        start = parseInt(base, 10);
+        end = range.max;
       }
-      values.add(i);
+
+      if (isNaN(start) || isNaN(end)) return { valid: false, error: 'Invalid range' };
+      for (var j = start; j <= end; j += step) values.push(j);
+      continue;
     }
+
+    var rangeMatch2 = part.match(/^(\d+)-(\d+)$/);
+    if (rangeMatch2) {
+      var s = parseInt(rangeMatch2[1], 10);
+      var e = parseInt(rangeMatch2[2], 10);
+      if (s < range.min || e > range.max) return { valid: false, error: 'Value out of range (' + range.min + '-' + range.max + ')' };
+      for (var k = s; k <= e; k++) values.push(k);
+      continue;
+    }
+
+    var num = parseInt(part, 10);
+    if (isNaN(num)) return { valid: false, error: 'Invalid value: ' + part };
+    if (num < range.min || num > range.max) return { valid: false, error: 'Value ' + num + ' out of range (' + range.min + '-' + range.max + ')' };
+    values.push(num);
   }
 
-  // Normalize dayOfWeek: 7 = 0 (Sunday)
-  if (fieldName === 'dayOfWeek' && values.has(7)) {
-    values.delete(7);
-    values.add(0);
-  }
-
-  return { valid: true, values: Array.from(values).sort((a, b) => a - b) };
+  return { valid: true, values: values };
 }
 
-module.exports = { validate, describe, CRON_ALIASES, FIELD_NAMES, FIELD_RANGES };
+function _replaceNames(part, index) {
+  var result = part;
+  if (index === 3) {
+    Object.keys(MONTH_NAMES).forEach(function(name) {
+      result = result.replace(new RegExp(name, 'g'), String(MONTH_NAMES[name]));
+    });
+  }
+  if (index === 4) {
+    Object.keys(DAY_NAMES).forEach(function(name) {
+      result = result.replace(new RegExp(name, 'g'), String(DAY_NAMES[name]));
+    });
+  }
+  return result;
+}
+
+function _describeField(field, index) {
+  if (field === '*') return 'every';
+  return field;
+}
+
+module.exports = { validate: validate, describe: describe, ALIASES: ALIASES };

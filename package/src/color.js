@@ -1,9 +1,12 @@
 /**
- * toolmetryai — Color Converter
+ * toolmetry — Color Converter
  * Convert between HEX, RGB, HSL, and named colors.
+ * @module color
  */
 
-const NAMED_COLORS = {
+'use strict';
+
+var NAMED_COLORS = {
   black: '#000000', white: '#ffffff', red: '#ff0000', green: '#008000', blue: '#0000ff',
   yellow: '#ffff00', cyan: '#00ffff', magenta: '#ff00ff', orange: '#ffa500', purple: '#800080',
   pink: '#ffc0cb', gray: '#808080', grey: '#808080', brown: '#a52a2a', navy: '#000080',
@@ -12,13 +15,8 @@ const NAMED_COLORS = {
   violet: '#ee82ee', crimson: '#dc143c', turquoise: '#40e0d0', lavender: '#e6e6fa',
 };
 
-/**
- * Convert HEX to RGB.
- * @param {string} hex - Hex color string (with or without #).
- * @returns {{ r: number, g: number, b: number }} RGB values (0-255).
- */
 function hexToRgb(hex) {
-  const h = _normalizeHex(hex);
+  var h = _normalizeHex(hex);
   return {
     r: parseInt(h.slice(0, 2), 16),
     g: parseInt(h.slice(2, 4), 16),
@@ -26,37 +24,23 @@ function hexToRgb(hex) {
   };
 }
 
-/**
- * Convert RGB to HEX.
- * @param {number} r - Red (0-255).
- * @param {number} g - Green (0-255).
- * @param {number} b - Blue (0-255).
- * @returns {string} Hex color string with #.
- */
 function rgbToHex(r, g, b) {
-  return '#' + [r, g, b].map(v => {
-    const val = Math.max(0, Math.min(255, Math.round(v)));
+  return '#' + [r, g, b].map(function(v) {
+    var val = Math.max(0, Math.min(255, Math.round(v)));
     return val.toString(16).padStart(2, '0');
   }).join('');
 }
 
-/**
- * Convert RGB to HSL.
- * @param {number} r - Red (0-255).
- * @param {number} g - Green (0-255).
- * @param {number} b - Blue (0-255).
- * @returns {{ h: number, s: number, l: number }} HSL values (h: 0-360, s/l: 0-100).
- */
 function rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s;
-  const l = (max + min) / 2;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s;
+  var l = (max + min) / 2;
 
   if (max === min) {
     h = s = 0;
   } else {
-    const d = max - min;
+    var d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
       case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
@@ -72,21 +56,14 @@ function rgbToHsl(r, g, b) {
   };
 }
 
-/**
- * Convert HSL to RGB.
- * @param {number} h - Hue (0-360).
- * @param {number} s - Saturation (0-100).
- * @param {number} l - Lightness (0-100).
- * @returns {{ r: number, g: number, b: number }} RGB values (0-255).
- */
 function hslToRgb(h, s, l) {
   h /= 360; s /= 100; l /= 100;
 
-  let r, g, b;
+  var r, g, b;
   if (s === 0) {
     r = g = b = l;
   } else {
-    const hue2rgb = (p, q, t) => {
+    var hue2rgb = function(p, q, t) {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
       if (t < 1/6) return p + (q - p) * 6 * t;
@@ -94,8 +71,8 @@ function hslToRgb(h, s, l) {
       if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
       return p;
     };
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
     r = hue2rgb(p, q, h + 1/3);
     g = hue2rgb(p, q, h);
     b = hue2rgb(p, q, h - 1/3);
@@ -108,106 +85,73 @@ function hslToRgb(h, s, l) {
   };
 }
 
-/**
- * Convert HEX to HSL.
- * @param {string} hex - Hex color string.
- * @returns {{ h: number, s: number, l: number }} HSL values.
- */
 function hexToHsl(hex) {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHsl(r, g, b);
+  var rgb = hexToRgb(hex);
+  return rgbToHsl(rgb.r, rgb.g, rgb.b);
 }
 
-/**
- * Convert HSL to HEX.
- * @param {number} h - Hue (0-360).
- * @param {number} s - Saturation (0-100).
- * @param {number} l - Lightness (0-100).
- * @returns {string} Hex color string with #.
- */
 function hslToHex(h, s, l) {
-  const { r, g, b } = hslToRgb(h, s, l);
-  return rgbToHex(r, g, b);
+  var rgb = hslToRgb(h, s, l);
+  return rgbToHex(rgb.r, rgb.g, rgb.b);
 }
 
-/**
- * Get all format conversions for a color.
- * @param {string} input - Color in any supported format (hex, rgb, named).
- * @returns {{ hex: string, rgb: object, hsl: object, cssRgb: string, cssHsl: string }} All formats.
- */
 function convert(input) {
-  let hex;
-  const trimmed = (input || '').trim().toLowerCase();
+  var hex;
+  var trimmed = (input || '').trim().toLowerCase();
 
   if (trimmed.startsWith('#')) {
     hex = trimmed;
   } else if (NAMED_COLORS[trimmed]) {
     hex = NAMED_COLORS[trimmed];
   } else if (trimmed.startsWith('rgb')) {
-    const match = trimmed.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    var match = trimmed.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
     if (match) {
       hex = rgbToHex(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
     }
   } else {
-    throw new Error(`Unsupported color format: ${input}`);
+    throw new Error('Unsupported color format: ' + input);
   }
 
-  const rgb = hexToRgb(hex);
-  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  var rgb = hexToRgb(hex);
+  var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
 
   return {
-    hex,
-    rgb,
-    hsl,
-    cssRgb: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-    cssHsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
+    hex: hex,
+    rgb: rgb,
+    hsl: hsl,
+    cssRgb: 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')',
+    cssHsl: 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)',
   };
 }
 
-/**
- * Validate a hex color string.
- * @param {string} hex - The hex string to validate.
- * @returns {boolean} True if valid hex color.
- */
 function isValidHex(hex) {
   return /^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(hex);
 }
 
-/**
- * Lighten a hex color by a percentage.
- * @param {string} hex - Hex color.
- * @param {number} amount - Percentage to lighten (0-100).
- * @returns {string} Lightened hex color.
- */
 function lighten(hex, amount) {
-  const hsl = hexToHsl(hex);
+  var hsl = hexToHsl(hex);
   hsl.l = Math.min(100, hsl.l + amount);
   return hslToHex(hsl.h, hsl.s, hsl.l);
 }
 
-/**
- * Darken a hex color by a percentage.
- * @param {string} hex - Hex color.
- * @param {number} amount - Percentage to darken (0-100).
- * @returns {string} Darkened hex color.
- */
 function darken(hex, amount) {
-  const hsl = hexToHsl(hex);
+  var hsl = hexToHsl(hex);
   hsl.l = Math.max(0, hsl.l - amount);
   return hslToHex(hsl.h, hsl.s, hsl.l);
 }
 
 function _normalizeHex(hex) {
-  let h = hex.replace(/^#/, '').toLowerCase();
+  var h = hex.replace(/^#/, '').toLowerCase();
   if (h.length === 3) {
-    h = h.split('').map(c => c + c).join('');
+    h = h.split('').map(function(c) { return c + c; }).join('');
   }
-  if (h.length === 8) h = h.slice(0, 6); // strip alpha
-  if (h.length !== 6) throw new Error(`Invalid hex color: ${hex}`);
+  if (h.length === 8) h = h.slice(0, 6);
+  if (h.length !== 6) throw new Error('Invalid hex color: ' + hex);
   return h;
 }
 
 module.exports = {
-  hexToRgb, rgbToHex, rgbToHsl, hslToRgb, hexToHsl, hslToHex,
-  convert, isValidHex, lighten, darken, NAMED_COLORS,
+  hexToRgb: hexToRgb, rgbToHex: rgbToHex, rgbToHsl: rgbToHsl, hslToRgb: hslToRgb,
+  hexToHsl: hexToHsl, hslToHex: hslToHex, convert: convert, isValidHex: isValidHex,
+  lighten: lighten, darken: darken, NAMED_COLORS: NAMED_COLORS,
 };

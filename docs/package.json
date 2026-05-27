@@ -1,6 +1,6 @@
 {
   "name": "toolmetry-developer-web",
-  "version": "3.0.0",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,14 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.16.0",
     "next": "^15.3.0",
-    "next-themes": "^0.4.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.6.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

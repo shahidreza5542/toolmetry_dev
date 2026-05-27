@@ -1,7 +1,10 @@
 /**
- * toolmetryai — JWT Decoder
+ * toolmetry — JWT Decoder
  * Decode and inspect JSON Web Tokens without verification.
+ * @module jwt
  */
+
+'use strict';
 
 /**
  * Decode a JWT token and return its header, payload, and signature.
@@ -13,18 +16,16 @@ function decode(token) {
   if (typeof token !== 'string') {
     throw new TypeError('Token must be a string');
   }
-
-  const parts = token.split('.');
+  var parts = token.split('.');
   if (parts.length !== 3) {
     throw new Error('Invalid JWT: must have 3 parts separated by dots');
   }
-
-  const [headerB64, payloadB64, signature] = parts;
-
-  const header = _decodeBase64JSON(headerB64);
-  const payload = _decodeBase64JSON(payloadB64);
-
-  return { header, payload, signature };
+  var headerB64 = parts[0];
+  var payloadB64 = parts[1];
+  var signature = parts[2];
+  var header = _decodeBase64JSON(headerB64);
+  var payload = _decodeBase64JSON(payloadB64);
+  return { header: header, payload: payload, signature: signature };
 }
 
 /**
@@ -36,7 +37,7 @@ function decodeHeader(token) {
   if (typeof token !== 'string') {
     throw new TypeError('Token must be a string');
   }
-  const parts = token.split('.');
+  var parts = token.split('.');
   if (parts.length < 1) {
     throw new Error('Invalid JWT format');
   }
@@ -52,7 +53,7 @@ function decodePayload(token) {
   if (typeof token !== 'string') {
     throw new TypeError('Token must be a string');
   }
-  const parts = token.split('.');
+  var parts = token.split('.');
   if (parts.length < 2) {
     throw new Error('Invalid JWT format');
   }
@@ -65,10 +66,11 @@ function decodePayload(token) {
  * @param {number} [graceSeconds=0] - Grace period in seconds.
  * @returns {boolean} True if the token is expired.
  */
-function isExpired(token, graceSeconds = 0) {
-  const { payload } = decode(token);
-  if (!payload.exp) return false;
-  return Date.now() / 1000 > payload.exp + graceSeconds;
+function isExpired(token, graceSeconds) {
+  var grace = graceSeconds || 0;
+  var result = decode(token);
+  if (!result.payload.exp) return false;
+  return Date.now() / 1000 > result.payload.exp + grace;
 }
 
 /**
@@ -84,11 +86,15 @@ function isValidFormat(token) {
 /**
  * Get the algorithm used in the JWT header.
  * @param {string} token - The JWT token string.
- * @returns {string} The algorithm name (e.g., 'HS256', 'RS256').
+ * @returns {string|null} The algorithm name (e.g., 'HS256', 'RS256').
  */
 function getAlgorithm(token) {
-  const header = decodeHeader(token);
-  return header.alg || 'unknown';
+  try {
+    var header = decodeHeader(token);
+    return header.alg || null;
+  } catch (e) {
+    return null;
+  }
 }
 
 /**
@@ -97,17 +103,23 @@ function getAlgorithm(token) {
  * @returns {number|null} Seconds until expiry, or null if no exp claim.
  */
 function timeUntilExpiry(token) {
-  const { payload } = decode(token);
-  if (!payload.exp) return null;
-  return Math.max(0, payload.exp - Date.now() / 1000);
+  var result = decode(token);
+  if (!result.payload.exp) return null;
+  return Math.max(0, result.payload.exp - Date.now() / 1000);
 }
 
+/**
+ * Decode Base64URL JSON.
+ * @param {string} b64url - Base64URL encoded string.
+ * @returns {object} Parsed JSON object.
+ * @private
+ */
 function _decodeBase64JSON(b64url) {
-  let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  var b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
   while (b64.length % 4 !== 0) {
     b64 += '=';
   }
-  let json;
+  var json;
   if (typeof Buffer !== 'undefined') {
     json = Buffer.from(b64, 'base64').toString('utf8');
   } else {
@@ -115,9 +127,9 @@ function _decodeBase64JSON(b64url) {
   }
   try {
     return JSON.parse(json);
-  } catch {
+  } catch (e) {
     throw new Error('Failed to parse JWT part as JSON');
   }
 }
 
-module.exports = { decode, decodeHeader, decodePayload, isExpired, isValidFormat, getAlgorithm, timeUntilExpiry };
+module.exports = { decode: decode, decodeHeader: decodeHeader, decodePayload: decodePayload, isExpired: isExpired, isValidFormat: isValidFormat, getAlgorithm: getAlgorithm, timeUntilExpiry: timeUntilExpiry };
