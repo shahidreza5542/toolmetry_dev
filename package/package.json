@@ -1,0 +1,56 @@
+{
+  "name": "toolmetry",
+  "version": "1.0.3",
+  "description": "A comprehensive developer tools library — Base64, URL encoding, hashing, JWT, UUID, AES-256 encryption, random generation, color conversion, HTML entities, number base, text utilities, JSON, password generator, Morse code, Roman numerals, cron validator, diff checker, lorem ipsum and more. Built by ToolmetryAI.",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/index.test.js",
+    "build": "echo 'No build needed — pure JS package'"
+  },
+  "keywords": [
+    "toolmetry",
+    "toolmetryai",
+    "developer-tools",
+    "base64",
+    "encode",
+    "decode",
+    "hash",
+    "sha256",
+    "md5",
+    "jwt",
+    "uuid",
+    "aes-256",
+    "encrypt",
+    "decrypt",
+    "random",
+    "color-converter",
+    "html-entities",
+    "url-encoder",
+    "number-base",
+    "text-tools",
+    "json",
+    "password-generator",
+    "morse-code",
+    "roman-numerals",
+    "cron-validator",
+    "diff-checker",
+    "lorem-ipsum",
+    "utility"
+  ],
+  "author": "ToolmetryAI <contact@toolmetryai.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toolmetryai/toolmetry-npm"
+  },
+  "homepage": "https://toolmetryai.com",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
