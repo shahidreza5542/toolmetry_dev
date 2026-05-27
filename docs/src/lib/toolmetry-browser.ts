@@ -186,18 +186,17 @@ let _toolmetry: ToolmetryModule | null = null;
 
 /**
  * Load the toolmetry npm package dynamically.
- * Works in browser because Next.js handles CJS->ESM interop.
+ * Uses require() to load the CJS entry point which is browser-bundle-safe.
+ * The ESM entry (index.mjs) uses `import from 'module'` which is Node.js-only,
+ * so we bypass it by requiring the CJS index.js directly.
  */
-async function loadToolmetry(): Promise<ToolmetryModule> {
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const toolmetryCjs = require('toolmetry') as ToolmetryModule;
+
+function loadToolmetry(): ToolmetryModule {
   if (_toolmetry) return _toolmetry;
-  try {
-    const mod = await import('toolmetry');
-    _toolmetry = mod.default || mod;
-    return _toolmetry!;
-  } catch (e) {
-    console.error('[toolmetry-browser] Failed to load toolmetry package:', e);
-    throw new Error('Failed to load toolmetry package');
-  }
+  _toolmetry = toolmetryCjs;
+  return _toolmetry;
 }
 
 // ─── AES-256 Encrypt/Decrypt (Browser-safe with FIXED importKey) ─────────────
@@ -313,7 +312,7 @@ async function hashAllAsync(input: string): Promise<Record<string, string>> {
  * Use this for all browser-safe modules: base64, url, jwt, uuid, color,
  * htmlEntity, numberBase, text, json, password, morse, roman, cron, diff, lorem, random.
  */
-export async function getToolmetry(): Promise<ToolmetryModule> {
+export function getToolmetry(): ToolmetryModule {
   return loadToolmetry();
 }
 
@@ -338,7 +337,7 @@ export async function runToolFunction(
   input: string,
   secret?: string
 ): Promise<string> {
-  const t = await loadToolmetry();
+  const t = loadToolmetry();
 
   switch (toolSlug) {
     case 'base64': {
