@@ -1,125 +1,164 @@
-"use client";
+'use client';
 
-import { use } from "react";
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import Sidebar from "../../../components/Sidebar";
-import CodeBlock from "../../../components/CodeBlock";
-import TryItPanel from "../../../components/TryItPanel";
-import Link from "next/link";
-import { getToolBySlug, tools } from "../../../lib/tools-data";
+import { useParams } from 'next/navigation';
+import { getToolBySlug, iconMap, tools, categoryColors } from '@/lib/tools-data';
+import { CodeBlock } from '@/app/components/CodeBlock';
+import { TryItLive } from '@/app/components/TryItLive';
+import { Sidebar } from '@/app/components/Sidebar';
+import Link from 'next/link';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-export default function ToolDocPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function ToolDocPage() {
+  const params = useParams();
+  const slug = params.slug as string;
   const tool = getToolBySlug(slug);
 
   if (!tool) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--color-surface)", paddingTop: "120px", textAlign: "center" }}>
-        <Navbar />
-        <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "12px" }}>Tool Not Found</h1>
-        <p style={{ color: "var(--color-on-surface-variant)", marginBottom: "24px" }}>The tool &quot;{slug}&quot; does not exist.</p>
-        <Link href="/docs" style={{ color: "var(--color-primary)", fontWeight: 600 }}>Back to Docs</Link>
-        <Footer />
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 text-center">
+        <h1 className="text-2xl font-bold text-foreground mb-4">Module Not Found</h1>
+        <p className="text-muted-foreground mb-6">
+          The module &quot;{slug}&quot; does not exist in the toolmetry package.
+        </p>
+        <Link
+          href="/docs"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline"
+        >
+          <ArrowLeft size={14} /> Back to Documentation
+        </Link>
       </div>
     );
   }
 
+  const Icon = iconMap[tool.icon];
+  const catColor = categoryColors[tool.category];
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-surface)" }}>
-      <Navbar />
-      <div style={{ display: "flex", paddingTop: "72px" }}>
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="lg:flex lg:gap-8">
+        {/* Sidebar */}
         <Sidebar />
-        <main style={{ flex: 1, padding: "32px 40px", maxWidth: "900px" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "16px", fontSize: "13px" }}>
-            <Link href="/docs" style={{ color: "var(--color-primary)", textDecoration: "none" }}>Docs</Link>
-            <span style={{ color: "var(--color-outline)" }}>/</span>
-            <span style={{ color: "var(--color-on-surface-variant)" }}>{tool.category}</span>
-            <span style={{ color: "var(--color-outline)" }}>/</span>
-            <span style={{ color: "var(--color-on-surface)", fontWeight: 500 }}>{tool.name}</span>
+
+        {/* Main content */}
+        <div className="min-w-0 flex-1">
+          {/* Breadcrumb */}
+          <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+            >
+              <ArrowLeft size={14} /> Documentation
+            </Link>
+            <span>/</span>
+            <span className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${catColor}`}>
+              {tool.category}
+            </span>
           </div>
 
-          <div style={{
-            display: "inline-block",
-            padding: "4px 10px",
-            borderRadius: "6px",
-            background: "var(--color-secondary-container)",
-            fontSize: "11px",
-            fontWeight: 600,
-            color: "var(--color-primary)",
-            marginBottom: "12px",
-          }}>
-            {tool.category}
-          </div>
-
-          <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "12px", letterSpacing: "-0.03em" }}>{tool.name}</h1>
-          <p style={{ fontSize: "15px", color: "var(--color-on-surface-variant)", lineHeight: 1.7, marginBottom: "32px" }}>
-            {tool.description}
-          </p>
-
-          <div style={{
-            background: "var(--color-surface-container)",
-            border: "1px solid var(--color-outline-variant)",
-            borderRadius: "10px",
-            padding: "14px 18px",
-            marginBottom: "32px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}>
-            <span style={{ fontSize: "13px", color: "var(--color-outline)", fontFamily: "var(--font-mono)" }}>$</span>
-            <code style={{ fontSize: "14px", fontFamily: "var(--font-mono)", color: "var(--color-primary)", fontWeight: 500 }}>npm i toolmetry</code>
-          </div>
-
-          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Functions</h2>
-          <div style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginBottom: "32px",
-            border: "1px solid var(--color-outline-variant)",
-            borderRadius: "10px",
-            overflow: "hidden",
-          }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--color-secondary-container)" }}>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Function</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Params</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>Returns</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tool.functions.map((fn, i) => (
-                  <tr key={i} style={{ borderBottom: i < tool.functions.length - 1 ? "1px solid var(--color-outline-variant)" : "none" }}>
-                    <td style={{ padding: "10px 14px", fontSize: "13px", fontFamily: "var(--font-mono)", fontWeight: 500, color: "var(--color-primary)" }}>{fn.name}</td>
-                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "var(--color-on-surface-variant)" }}>
-                      {fn.params.map(p => (
-                        <span key={p.name} style={{ marginRight: "6px" }}>
-                          {p.required ? <b>{p.name}</b> : <span>{p.name}?</span>}
-                          <span style={{ color: "var(--color-outline)", marginLeft: "2px" }}>:{p.type}</span>
-                        </span>
-                      ))}
-                    </td>
-                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "var(--color-on-surface-variant)", fontFamily: "var(--font-mono)" }}>{fn.returns}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Examples</h2>
-          {tool.examples.map((ex, i) => (
-            <div key={i} style={{ marginBottom: "24px" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", color: "var(--color-on-surface-variant)" }}>{ex.title}</h3>
-              <CodeBlock code={ex.code} language="javascript" />
+          {/* Tool Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-accent">
+              {Icon && <Icon size={28} />}
             </div>
-          ))}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tool.name}</h1>
+              <p className="text-muted-foreground mt-0.5">{tool.description}</p>
+            </div>
+          </div>
 
-          <h2 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "16px" }}>Try It Live</h2>
-          <TryItPanel toolName={tool.slug} />
-        </main>
+          {/* Import Statement */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-3">Import</h2>
+            <CodeBlock code={tool.importStatement} title="Import Statement" />
+          </section>
+
+          {/* API Reference */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-3">API Reference</h2>
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="text-left px-4 py-3 font-semibold text-foreground">Function</th>
+                      <th className="text-left px-4 py-3 font-semibold text-foreground">Parameters</th>
+                      <th className="text-left px-4 py-3 font-semibold text-foreground">Returns</th>
+                      <th className="text-left px-4 py-3 font-semibold text-foreground">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tool.functions.map((fn, i) => (
+                      <tr key={i} className="border-b border-border last:border-0">
+                        <td className="px-4 py-2.5">
+                          <code className="text-xs font-mono font-semibold text-brand">{fn.name}</code>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <code className="text-xs font-mono text-muted-foreground">{fn.params || '—'}</code>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <code className="text-xs font-mono text-muted-foreground">{fn.returns}</code>
+                        </td>
+                        <td className="px-4 py-2.5 text-muted-foreground">{fn.description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          {/* Code Examples */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-3">Examples</h2>
+            <div className="space-y-4">
+              {tool.examples.map((example, i) => (
+                <CodeBlock key={i} code={example.code} title={example.title} />
+              ))}
+            </div>
+          </section>
+
+          {/* Try It Live */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              <span className="gradient-text">Try It</span>
+            </h2>
+            <TryItLive toolSlug={tool.slug} />
+          </section>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-6 border-t border-border">
+            {(() => {
+              const currentIndex = tools.findIndex(t => t.slug === slug);
+              const prevTool = currentIndex > 0 ? tools[currentIndex - 1] : null;
+              const nextTool = currentIndex < tools.length - 1 ? tools[currentIndex + 1] : null;
+              return (
+                <>
+                  {prevTool ? (
+                    <Link
+                      href={`/docs/${prevTool.slug}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ArrowLeft size={14} /> {prevTool.name}
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                  {nextTool ? (
+                    <Link
+                      href={`/docs/${nextTool.slug}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+                    >
+                      {nextTool.name} <ArrowRight size={14} />
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
       </div>
-      <Footer />
     </div>
   );
 }

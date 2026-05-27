@@ -1,299 +1,829 @@
-export interface ToolDef {
+import {
+  FileCode, Link, Shield, KeyRound, Fingerprint, Palette,
+  Code2, Binary, Type, Braces, Lock, Radio, Hash,
+  Clock, GitCompare, AlignLeft, LockKeyhole, Shuffle
+} from 'lucide-react';
+
+export type Category = 'Encoding' | 'Security' | 'Identity' | 'Design' | 'Math' | 'Text' | 'Data' | 'Utility' | 'Content';
+
+export interface ToolFunction {
+  name: string;
+  params: string;
+  returns: string;
+  description: string;
+}
+
+export interface ToolInfo {
   slug: string;
   name: string;
   icon: string;
+  category: Category;
   description: string;
-  category: string;
-  functions: {
-    name: string;
-    description: string;
-    params: { name: string; type: string; required?: boolean; description: string; default?: string }[];
-    returns: string;
-  }[];
+  importStatement: string;
+  functions: ToolFunction[];
   examples: { title: string; code: string }[];
 }
 
-export const tools: ToolDef[] = [
+export const categories: Category[] = [
+  'Encoding', 'Security', 'Identity', 'Design', 'Math', 'Text', 'Data', 'Utility', 'Content'
+];
+
+export const categoryColors: Record<Category, string> = {
+  Encoding: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  Security: 'bg-red-500/10 text-red-600 dark:text-red-400',
+  Identity: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  Design: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
+  Math: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  Text: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  Data: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+  Utility: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  Content: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+};
+
+export const tools: ToolInfo[] = [
   {
-    slug: "base64",
-    name: "Base64 Encode/Decode",
-    icon: "FileCode",
-    description: "Encode and decode Base64 strings, including URL-safe variants and buffer support. Essential for data encoding in web applications, APIs, and binary data handling.",
-    category: "Encoding",
+    slug: 'base64',
+    name: 'Base64 Encode/Decode',
+    icon: 'FileCode',
+    category: 'Encoding',
+    description: 'Encode and decode Base64 strings, with URL-safe and buffer support.',
+    importStatement: `const { base64 } = require('toolmetry');`,
     functions: [
-      { name: "base64Encode", description: "Encode a string to Base64", params: [{ name: "input", type: "string", required: true, description: "The string to encode" }], returns: "string" },
-      { name: "base64Decode", description: "Decode a Base64 string", params: [{ name: "input", type: "string", required: true, description: "The Base64 string" }], returns: "string" },
-      { name: "base64EncodeURL", description: "Encode to URL-safe Base64", params: [{ name: "input", type: "string", required: true, description: "The string to encode" }], returns: "string" },
-      { name: "base64DecodeURL", description: "Decode URL-safe Base64", params: [{ name: "input", type: "string", required: true, description: "The Base64URL string" }], returns: "string" },
+      { name: 'base64.encode', params: 'input: string, encoding?: string', returns: 'string', description: 'Encode a string to Base64' },
+      { name: 'base64.decode', params: 'input: string, encoding?: string', returns: 'string', description: 'Decode a Base64 string' },
+      { name: 'base64.encodeURL', params: 'input: string', returns: 'string', description: 'Encode to URL-safe Base64' },
+      { name: 'base64.decodeURL', params: 'input: string', returns: 'string', description: 'Decode URL-safe Base64' },
+      { name: 'base64.isValid', params: 'input: string', returns: 'boolean', description: 'Check if a string is valid Base64' },
+      { name: 'base64.encodeBuffer', params: 'buffer: ArrayBuffer | Uint8Array', returns: 'string', description: 'Encode buffer to Base64' },
+      { name: 'base64.decodeToBuffer', params: 'input: string', returns: 'Uint8Array', description: 'Decode Base64 to Uint8Array' },
     ],
     examples: [
-      { title: "Basic encode/decode", code: `import { base64Encode, base64Decode } from 'toolmetry';\n\nconst encoded = base64Encode('Hello, Toolmetry!');\nconsole.log(encoded); // "SGVsbG8sIFRvb2xtZXRyeSE="\n\nconst decoded = base64Decode(encoded);\nconsole.log(decoded); // "Hello, Toolmetry!"` },
+      {
+        title: 'Basic Encode/Decode',
+        code: `const { base64 } = require('toolmetry');
+
+const encoded = base64.encode('Hello, World!');
+// "SGVsbG8sIFdvcmxkIQ=="
+
+const decoded = base64.decode(encoded);
+// "Hello, World!"`,
+      },
+      {
+        title: 'URL-Safe Base64',
+        code: `const { base64 } = require('toolmetry');
+
+const urlSafe = base64.encodeURL('Hello+World/Test=');
+// "SGVsbG8rV29ybGQvVGVzdA"
+
+const original = base64.decodeURL(urlSafe);
+// "Hello+World/Test="`,
+      },
+      {
+        title: 'Validation',
+        code: `const { base64 } = require('toolmetry');
+
+base64.isValid('SGVsbG8='); // true
+base64.isValid('not-base64!'); // false`,
+      },
+      {
+        title: 'Buffer Operations',
+        code: `const { base64 } = require('toolmetry');
+
+const buffer = new Uint8Array([72, 101, 108, 108, 111]);
+const encoded = base64.encodeBuffer(buffer);
+// "SGVsbG8="
+
+const decoded = base64.decodeToBuffer(encoded);
+// Uint8Array [72, 101, 108, 108, 111]`,
+      },
     ],
   },
   {
-    slug: "url",
-    name: "URL Encoder/Decoder",
-    icon: "Link",
-    description: "Encode and decode URL components, build and parse query strings. Perfect for handling URL parameters and query string manipulation.",
-    category: "Encoding",
+    slug: 'url',
+    name: 'URL Encoder/Decoder',
+    icon: 'Link',
+    category: 'Encoding',
+    description: 'Encode and decode URL components, build and parse query strings effortlessly.',
+    importStatement: `const { url } = require('toolmetry');`,
     functions: [
-      { name: "urlEncode", description: "Encode for URL parameters", params: [{ name: "input", type: "string", required: true, description: "The string to encode" }], returns: "string" },
-      { name: "urlDecode", description: "Decode a URL-encoded string", params: [{ name: "input", type: "string", required: true, description: "The URL-encoded string" }], returns: "string" },
-      { name: "urlBuildQuery", description: "Build a query string from an object", params: [{ name: "params", type: "Record<string, string|number|boolean>", required: true, description: "Key-value pairs" }], returns: "string" },
-      { name: "urlParseQuery", description: "Parse a query string into an object", params: [{ name: "qs", type: "string", required: true, description: "The query string" }], returns: "Record<string, string>" },
+      { name: 'url.encode', params: 'input: string', returns: 'string', description: 'URL-encode a string' },
+      { name: 'url.decode', params: 'input: string', returns: 'string', description: 'Decode a URL-encoded string' },
+      { name: 'url.buildQuery', params: 'params: Record<string, string|number|boolean>', returns: 'string', description: 'Build a query string from an object' },
+      { name: 'url.parseQuery', params: 'qs: string', returns: 'Record<string, string>', description: 'Parse a query string into an object' },
     ],
     examples: [
-      { title: "Build and parse query strings", code: `import { urlBuildQuery, urlParseQuery } from 'toolmetry';\n\nconst qs = urlBuildQuery({ name: 'Toolmetry', version: 3 });\nconsole.log(qs); // "?name=Toolmetry&version=3"\n\nconst params = urlParseQuery(qs);\nconsole.log(params); // { name: "Toolmetry", version: "3" }` },
+      {
+        title: 'Encode/Decode',
+        code: `const { url } = require('toolmetry');
+
+const encoded = url.encode('hello world&foo=bar');
+// "hello%20world%26foo%3Dbar"
+
+const decoded = url.decode(encoded);
+// "hello world&foo=bar"`,
+      },
+      {
+        title: 'Build Query String',
+        code: `const { url } = require('toolmetry');
+
+const qs = url.buildQuery({ name: 'John', age: 30, active: true });
+// "?name=John&age=30&active=true"`,
+      },
+      {
+        title: 'Parse Query String',
+        code: `const { url } = require('toolmetry');
+
+const params = url.parseQuery('?name=John&age=30');
+// { name: "John", age: "30" }`,
+      },
     ],
   },
   {
-    slug: "hash",
-    name: "Hash Generator",
-    icon: "Shield",
-    description: "Generate MD5, SHA-1, SHA-256, SHA-384, SHA-512 hashes with HMAC support. Supports hex, base64, and base64url output encodings.",
-    category: "Security",
+    slug: 'hash',
+    name: 'Hash Generator',
+    icon: 'Shield',
+    category: 'Security',
+    description: 'Generate hashes with MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC support.',
+    importStatement: `const { hash } = require('toolmetry');`,
     functions: [
-      { name: "hashGenerate", description: "Generate a hash (Node.js sync)", params: [{ name: "input", type: "string", required: true, description: "The string to hash" }, { name: "algorithm", type: "string", description: "Algorithm (default: sha256)" }], returns: "string" },
-      { name: "hashAsync", description: "Async hash via SubtleCrypto (browser)", params: [{ name: "input", type: "string", required: true, description: "The string to hash" }, { name: "algorithm", type: "string", description: "Algorithm (default: SHA-256)" }], returns: "Promise<string>" },
-      { name: "hmacGenerate", description: "Generate HMAC hash", params: [{ name: "input", type: "string", required: true, description: "The data" }, { name: "secret", type: "string", required: true, description: "The secret key" }], returns: "string" },
-      { name: "hashAll", description: "Generate all hashes at once", params: [{ name: "input", type: "string", required: true, description: "The string to hash" }], returns: "Record<string, string>" },
+      { name: 'hashGenerate', params: 'input: string, algorithm?: string, encoding?: string', returns: 'string', description: 'Generate a hash (Node.js sync)' },
+      { name: 'hashAsync', params: 'input: string, algorithm?: string, encoding?: string', returns: 'Promise<string>', description: 'Async hash (browser + Node)' },
+      { name: 'hmacGenerate', params: 'input: string, secret: string, algorithm?: string', returns: 'string', description: 'Generate HMAC hash (Node.js)' },
+      { name: 'hashAll', params: 'input: string', returns: 'Record<string, string>', description: 'Generate all algorithm hashes at once' },
     ],
     examples: [
-      { title: "Generate hashes", code: `import { hashGenerate, hashAll } from 'toolmetry';\n\nconst sha256 = hashGenerate('hello world');\nconsole.log(sha256);\n\nconst all = hashAll('hello world');\n// { md5: '...', sha1: '...', sha256: '...', sha384: '...', sha512: '...' }` },
+      {
+        title: 'SHA-256 Hash',
+        code: `const { hashGenerate } = require('toolmetry');
+
+const sha256 = hashGenerate('hello', 'sha256');
+// "2cf24dba5fb0a30e26e83b2ac5b9e29e..."`,
+      },
+      {
+        title: 'Async Hash (Browser)',
+        code: `const { hashAsync } = require('toolmetry');
+
+const hash = await hashAsync('hello', 'SHA-256');
+// Works in both browser and Node.js`,
+      },
+      {
+        title: 'All Hashes at Once',
+        code: `const { hashAll } = require('toolmetry');
+
+const all = hashAll('hello');
+// { md5: "...", sha1: "...", sha256: "...", sha384: "...", sha512: "..." }`,
+      },
+      {
+        title: 'HMAC',
+        code: `const { hmacGenerate } = require('toolmetry');
+
+const hmac = hmacGenerate('message', 'secret-key', 'sha256');
+// Node.js only`,
+      },
     ],
   },
   {
-    slug: "jwt",
-    name: "JWT Decoder",
-    icon: "KeyRound",
-    description: "Decode JWT tokens, check expiration, validate format, and extract algorithm info. Essential for debugging authentication flows.",
-    category: "Security",
+    slug: 'jwt',
+    name: 'JWT Decoder',
+    icon: 'KeyRound',
+    category: 'Security',
+    description: 'Decode and inspect JWT tokens without verification. Check expiry and claims.',
+    importStatement: `const { jwt } = require('toolmetry');`,
     functions: [
-      { name: "jwtDecode", description: "Decode a JWT token", params: [{ name: "token", type: "string", required: true, description: "The JWT token" }], returns: "{ header, payload, signature }" },
-      { name: "jwtIsExpired", description: "Check if a JWT is expired", params: [{ name: "token", type: "string", required: true, description: "The JWT token" }], returns: "boolean" },
-      { name: "jwtIsValidFormat", description: "Check valid JWT format", params: [{ name: "token", type: "string", required: true, description: "The string to check" }], returns: "boolean" },
+      { name: 'jwt.decode', params: 'token: string', returns: '{ header, payload, signature }', description: 'Decode a JWT into its parts' },
+      { name: 'jwt.decodeHeader', params: 'token: string', returns: 'object', description: 'Decode only the header' },
+      { name: 'jwt.decodePayload', params: 'token: string', returns: 'object', description: 'Decode only the payload' },
+      { name: 'jwt.isExpired', params: 'token: string, graceSeconds?: number', returns: 'boolean', description: 'Check if a JWT is expired' },
+      { name: 'jwt.isValidFormat', params: 'token: string', returns: 'boolean', description: 'Validate JWT format' },
+      { name: 'jwt.getAlgorithm', params: 'token: string', returns: 'string | null', description: 'Get the algorithm from JWT header' },
+      { name: 'jwt.timeUntilExpiry', params: 'token: string', returns: 'number | null', description: 'Seconds until JWT expires' },
     ],
     examples: [
-      { title: "Decode a JWT", code: `import { jwtDecode, jwtIsExpired } from 'toolmetry';\n\nconst token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';\n\nconst decoded = jwtDecode(token);\nconsole.log(decoded.header);  // { alg: "HS256" }\nconsole.log(decoded.payload); // { sub: "1234" }\nconsole.log(jwtIsExpired(token));` },
+      {
+        title: 'Decode a JWT',
+        code: `const { jwt } = require('toolmetry');
+
+const token = 'eyJhbGciOiJIUzI1NiIs...';
+
+const { header, payload, signature } = jwt.decode(token);
+// header: { alg: "HS256", typ: "JWT" }
+// payload: { sub: "1234567890", name: "John", ... }`,
+      },
+      {
+        title: 'Check Expiry',
+        code: `const { jwt } = require('toolmetry');
+
+const expired = jwt.isExpired(token); // true/false
+const timeLeft = jwt.timeUntilExpiry(token); // seconds or null`,
+      },
+      {
+        title: 'Get Algorithm',
+        code: `const { jwt } = require('toolmetry');
+
+const algo = jwt.getAlgorithm(token);
+// "HS256"`,
+      },
     ],
   },
   {
-    slug: "uuid",
-    name: "UUID Generator",
-    icon: "Fingerprint",
-    description: "Generate UUID v4, validate UUIDs, and get version info. Create unique identifiers for databases, distributed systems, and more.",
-    category: "Identity",
+    slug: 'uuid',
+    name: 'UUID Generator',
+    icon: 'Fingerprint',
+    category: 'Identity',
+    description: 'Generate unique UUIDs instantly with batch creation, validation, and version inspection.',
+    importStatement: `const { uuid } = require('toolmetry');`,
     functions: [
-      { name: "uuidV4", description: "Generate a UUID v4", params: [], returns: "string" },
-      { name: "uuidV4Short", description: "Short UUID v4 (no dashes)", params: [], returns: "string" },
-      { name: "uuidV4Batch", description: "Generate multiple UUIDs", params: [{ name: "count", type: "number", required: true, description: "Number of UUIDs" }], returns: "string[]" },
-      { name: "uuidIsValid", description: "Validate a UUID", params: [{ name: "uuid", type: "string", required: true, description: "The string to check" }], returns: "boolean" },
+      { name: 'uuid.v4', params: '', returns: 'string', description: 'Generate a v4 UUID' },
+      { name: 'uuid.v4Short', params: '', returns: 'string', description: 'Generate a v4 UUID without dashes' },
+      { name: 'uuid.v4Batch', params: 'count: number', returns: 'string[]', description: 'Generate multiple UUIDs at once' },
+      { name: 'uuid.isValid', params: 'input: string', returns: 'boolean', description: 'Validate a UUID string' },
+      { name: 'uuid.getVersion', params: 'input: string', returns: 'number | null', description: 'Get UUID version number' },
+      { name: 'uuid.nil', params: '', returns: 'string', description: 'Generate a NIL UUID' },
+      { name: 'uuid.isNil', params: 'input: string', returns: 'boolean', description: 'Check if a UUID is NIL' },
     ],
     examples: [
-      { title: "Generate UUIDs", code: `import { uuidV4, uuidV4Batch } from 'toolmetry';\n\nconst id = uuidV4();\nconsole.log(id); // "550e8400-e29b-41d4-..."\n\nconst batch = uuidV4Batch(3);\nconsole.log(batch); // Array of 3 UUIDs` },
+      {
+        title: 'Generate UUID',
+        code: `const { uuid } = require('toolmetry');
+
+const id = uuid.v4();
+// "550e8400-e29b-41d4-a716-446655440000"
+
+const short = uuid.v4Short();
+// "550e8400e29b41d4a716446655440000"`,
+      },
+      {
+        title: 'Batch Generation',
+        code: `const { uuid } = require('toolmetry');
+
+const ids = uuid.v4Batch(5);
+// ["uuid1", "uuid2", "uuid3", "uuid4", "uuid5"]`,
+      },
+      {
+        title: 'Validation & Version',
+        code: `const { uuid } = require('toolmetry');
+
+uuid.isValid('550e8400-e29b-41d4-a716-446655440000'); // true
+uuid.getVersion('550e8400-e29b-41d4-a716-446655440000'); // 4
+uuid.isNil(uuid.nil()); // true`,
+      },
     ],
   },
   {
-    slug: "encrypt",
-    name: "AES-256 Encrypt/Decrypt",
-    icon: "Lock",
-    description: "AES-256-GCM encryption with PBKDF2 key derivation. Sync methods for Node.js, async for browsers via SubtleCrypto.",
-    category: "Security",
+    slug: 'encrypt',
+    name: 'AES-256 Encrypt/Decrypt',
+    icon: 'LockKeyhole',
+    category: 'Security',
+    description: 'AES-256-GCM encryption for secure messages with PBKDF2 key derivation.',
+    importStatement: `const { encrypt } = require('toolmetry');`,
     functions: [
-      { name: "aesEncrypt", description: "Encrypt text (Node.js sync)", params: [{ name: "plaintext", type: "string", required: true, description: "Text to encrypt" }, { name: "secret", type: "string", required: true, description: "Encryption secret" }], returns: "string" },
-      { name: "aesDecrypt", description: "Decrypt text (Node.js sync)", params: [{ name: "encrypted", type: "string", required: true, description: "Encrypted string" }, { name: "secret", type: "string", required: true, description: "Encryption secret" }], returns: "string" },
-      { name: "aesEncryptAsync", description: "Async encrypt (browser)", params: [{ name: "plaintext", type: "string", required: true, description: "Text to encrypt" }, { name: "secret", type: "string", required: true, description: "Encryption secret" }], returns: "Promise<string>" },
-      { name: "aesDecryptAsync", description: "Async decrypt (browser)", params: [{ name: "encrypted", type: "string", required: true, description: "Encrypted string" }, { name: "secret", type: "string", required: true, description: "Encryption secret" }], returns: "Promise<string>" },
+      { name: 'aesEncrypt', params: 'plaintext: string, secret: string', returns: 'string', description: 'Encrypt text using AES-256-GCM (Node.js sync)' },
+      { name: 'aesDecrypt', params: 'encrypted: string, secret: string', returns: 'string', description: 'Decrypt AES-256-GCM encrypted text (Node.js)' },
+      { name: 'aesEncryptAsync', params: 'plaintext: string, secret: string', returns: 'Promise<string>', description: 'Async encrypt (browser + Node)' },
+      { name: 'aesDecryptAsync', params: 'encrypted: string, secret: string', returns: 'Promise<string>', description: 'Async decrypt (browser + Node)' },
     ],
     examples: [
-      { title: "Encrypt and decrypt", code: `import { aesEncrypt, aesDecrypt } from 'toolmetry';\n\n// Node.js (sync)\nconst encrypted = aesEncrypt('Secret message', 'my-password');\nconst decrypted = aesDecrypt(encrypted, 'my-password');\nconsole.log(decrypted); // "Secret message"\n\n// Browser (async)\nconst enc = await aesEncryptAsync('Secret', 'password');\nconst dec = await aesDecryptAsync(enc, 'password');` },
+      {
+        title: 'Encrypt & Decrypt (Node.js)',
+        code: `const { aesEncrypt, aesDecrypt } = require('toolmetry');
+
+const encrypted = aesEncrypt('Hello, secret!', 'my-password');
+// "iv:authTag:ciphertext" (Base64 parts)
+
+const decrypted = aesDecrypt(encrypted, 'my-password');
+// "Hello, secret!"`,
+      },
+      {
+        title: 'Async (Browser)',
+        code: `const { aesEncryptAsync, aesDecryptAsync } = require('toolmetry');
+
+const encrypted = await aesEncryptAsync('Hello!', 'my-password');
+const decrypted = await aesDecryptAsync(encrypted, 'my-password');
+// "Hello!"`,
+      },
     ],
   },
   {
-    slug: "random",
-    name: "Random Generator",
-    icon: "Shuffle",
-    description: "Generate random strings, numbers, hex, and more using cryptographically secure randomness. Includes pick, shuffle, boolean, and float utilities.",
-    category: "Utility",
+    slug: 'random',
+    name: 'Random Generator',
+    icon: 'Shuffle',
+    category: 'Utility',
+    description: 'Generate random strings, numbers, hex, alphanumeric, pick, shuffle, and more.',
+    importStatement: `const { random } = require('toolmetry');`,
     functions: [
-      { name: "randomString", description: "Generate a random string", params: [{ name: "length", type: "number", description: "Length (default: 16)" }], returns: "string" },
-      { name: "randomInt", description: "Random integer between min and max", params: [{ name: "min", type: "number", required: true, description: "Min" }, { name: "max", type: "number", required: true, description: "Max" }], returns: "number" },
-      { name: "randomHex", description: "Random hex string", params: [{ name: "length", type: "number", description: "Length (default: 32)" }], returns: "string" },
-      { name: "randomBoolean", description: "Random boolean", params: [], returns: "boolean" },
+      { name: 'randomString', params: 'length?: number, options?: object', returns: 'string', description: 'Generate a random string with options' },
+      { name: 'randomInt', params: 'min: number, max: number', returns: 'number', description: 'Random integer between min and max' },
+      { name: 'randomHex', params: 'length?: number', returns: 'string', description: 'Generate a random hex string' },
+      { name: 'randomAlphanumeric', params: 'length?: number', returns: 'string', description: 'Generate a random alphanumeric string' },
+      { name: 'randomPick', params: 'array: Array', returns: 'any', description: 'Pick a random element from an array' },
+      { name: 'randomShuffle', params: 'array: Array', returns: 'Array', description: 'Shuffle an array (Fisher-Yates)' },
+      { name: 'randomBoolean', params: '', returns: 'boolean', description: 'Generate a random boolean' },
+      { name: 'randomFloat', params: 'min: number, max: number, decimals?: number', returns: 'number', description: 'Random float between min and max' },
     ],
     examples: [
-      { title: "Generate random values", code: `import { randomString, randomInt, randomHex } from 'toolmetry';\n\nconsole.log(randomString(16));  // "aB3dE7fG9hJ2kL5m"\nconsole.log(randomInt(1, 100));  // 42\nconsole.log(randomHex(16));      // "a1b2c3d4e5f6a7b8"` },
+      {
+        title: 'Random String',
+        code: `const { randomString } = require('toolmetry');
+
+const str = randomString(16, { lowercase: true, uppercase: true, digits: true });
+// "aB3xY9kL2mN5pQ8"
+
+const simple = randomString(8, { digits: true, symbols: false });
+// "aB3xY9kL"`,
+      },
+      {
+        title: 'Random Numbers',
+        code: `const { randomInt, randomFloat } = require('toolmetry');
+
+const int = randomInt(1, 100); // e.g. 42
+const float = randomFloat(0, 1, 4); // e.g. 0.5321`,
+      },
+      {
+        title: 'Hex & Alphanumeric',
+        code: `const { randomHex, randomAlphanumeric } = require('toolmetry');
+
+const hex = randomHex(32);
+// "a1b2c3d4e5f6..."
+
+const alpha = randomAlphanumeric(16);
+// "aB3xY9kL2mN5pQ8"`,
+      },
+      {
+        title: 'Pick & Shuffle',
+        code: `const { randomPick, randomShuffle } = require('toolmetry');
+
+const picked = randomPick(['apple', 'banana', 'cherry']);
+// "banana"
+
+const shuffled = randomShuffle([1, 2, 3, 4, 5]);
+// [3, 1, 5, 2, 4]`,
+      },
     ],
   },
   {
-    slug: "color",
-    name: "Color Converter",
-    icon: "Palette",
-    description: "Convert between HEX, RGB, and HSL color formats. Lighten and darken colors. Supports named colors and CSS output.",
-    category: "Design",
+    slug: 'color',
+    name: 'Color Converter',
+    icon: 'Palette',
+    category: 'Design',
+    description: 'Convert between HEX, RGB, and HSL with lighten/darken helpers.',
+    importStatement: `const { color } = require('toolmetry');`,
     functions: [
-      { name: "hexToRgb", description: "HEX to RGB", params: [{ name: "hex", type: "string", required: true, description: "HEX color" }], returns: "{ r, g, b }" },
-      { name: "rgbToHex", description: "RGB to HEX", params: [{ name: "r", type: "number", required: true, description: "Red" }, { name: "g", type: "number", required: true, description: "Green" }, { name: "b", type: "number", required: true, description: "Blue" }], returns: "string" },
-      { name: "colorLighten", description: "Lighten a HEX color", params: [{ name: "hex", type: "string", required: true, description: "HEX color" }, { name: "amount", type: "number", required: true, description: "Amount (0-100)" }], returns: "string" },
-      { name: "colorDarken", description: "Darken a HEX color", params: [{ name: "hex", type: "string", required: true, description: "HEX color" }, { name: "amount", type: "number", required: true, description: "Amount (0-100)" }], returns: "string" },
+      { name: 'color.hexToRgb', params: 'hex: string', returns: '{ r, g, b }', description: 'Convert HEX to RGB' },
+      { name: 'color.rgbToHex', params: 'r: number, g: number, b: number', returns: 'string', description: 'Convert RGB to HEX' },
+      { name: 'color.rgbToHsl', params: 'r: number, g: number, b: number', returns: '{ h, s, l }', description: 'Convert RGB to HSL' },
+      { name: 'color.hslToRgb', params: 'h: number, s: number, l: number', returns: '{ r, g, b }', description: 'Convert HSL to RGB' },
+      { name: 'color.hexToHsl', params: 'hex: string', returns: '{ h, s, l }', description: 'Convert HEX to HSL' },
+      { name: 'color.hslToHex', params: 'h: number, s: number, l: number', returns: 'string', description: 'Convert HSL to HEX' },
+      { name: 'color.convert', params: 'input: string', returns: 'object', description: 'Convert any color format' },
+      { name: 'color.isValidHex', params: 'hex: string', returns: 'boolean', description: 'Validate a HEX color' },
+      { name: 'color.lighten', params: 'hex: string, amount: number', returns: 'string', description: 'Lighten a color by percentage' },
+      { name: 'color.darken', params: 'hex: string, amount: number', returns: 'string', description: 'Darken a color by percentage' },
     ],
     examples: [
-      { title: "Convert colors", code: `import { hexToRgb, rgbToHex } from 'toolmetry';\n\nconst rgb = hexToRgb('#ff0000');\nconsole.log(rgb); // { r: 255, g: 0, b: 0 }\n\nconst hex = rgbToHex(255, 0, 0);\nconsole.log(hex); // "#ff0000"` },
+      {
+        title: 'HEX to RGB',
+        code: `const { color } = require('toolmetry');
+
+const rgb = color.hexToRgb('#3B82F6');
+// { r: 59, g: 130, b: 246 }`,
+      },
+      {
+        title: 'Full Conversion',
+        code: `const { color } = require('toolmetry');
+
+const all = color.convert('#3B82F6');
+// { hex: "#3b82f6", rgb: {r:59,g:130,b:246},
+//   hsl: {h:217,s:91,l:60},
+//   cssRgb: "rgb(59, 130, 246)",
+//   cssHsl: "hsl(217, 91%, 60%)" }`,
+      },
+      {
+        title: 'Lighten/Darken',
+        code: `const { color } = require('toolmetry');
+
+const lighter = color.lighten('#3B82F6', 20);
+const darker = color.darken('#3B82F6', 20);`,
+      },
     ],
   },
   {
-    slug: "html-entity",
-    name: "HTML Entity",
-    icon: "Code2",
-    description: "Encode and decode HTML entities to prevent XSS and sanitize content. Supports named and numeric entities.",
-    category: "Encoding",
+    slug: 'html-entity',
+    name: 'HTML Entity',
+    icon: 'Code2',
+    category: 'Encoding',
+    description: 'Encode and decode HTML entities for special characters, named, and numeric.',
+    importStatement: `const { htmlEntity } = require('toolmetry');`,
     functions: [
-      { name: "htmlEntityEncode", description: "Encode HTML special characters", params: [{ name: "input", type: "string", required: true, description: "The string to encode" }], returns: "string" },
-      { name: "htmlEntityDecode", description: "Decode HTML entities", params: [{ name: "input", type: "string", required: true, description: "String with entities" }], returns: "string" },
+      { name: 'htmlEntity.encode', params: 'input: string', returns: 'string', description: 'Encode HTML special characters' },
+      { name: 'htmlEntity.decode', params: 'input: string', returns: 'string', description: 'Decode HTML entities to characters' },
+      { name: 'htmlEntity.encodeAll', params: 'input: string', returns: 'string', description: 'Encode all non-ASCII as numeric entities' },
+      { name: 'htmlEntity.encodeChars', params: 'input: string, chars: string[]', returns: 'string', description: 'Encode only specific characters' },
     ],
     examples: [
-      { title: "Encode and decode HTML", code: `import { htmlEntityEncode, htmlEntityDecode } from 'toolmetry';\n\nconst encoded = htmlEntityEncode('<script>alert("xss")</script>');\nconsole.log(encoded); // "&lt;script&gt;..."\n\nconst decoded = htmlEntityDecode(encoded);` },
+      {
+        title: 'Encode/Decode',
+        code: `const { htmlEntity } = require('toolmetry');
+
+const encoded = htmlEntity.encode('<div class="test">Hello & World</div>');
+// "&lt;div class=&quot;test&quot;&gt;Hello &amp; World&lt;/div&gt;"
+
+const decoded = htmlEntity.decode(encoded);
+// "<div class="test">Hello & World</div>"`,
+      },
+      {
+        title: 'Encode All Non-ASCII',
+        code: `const { htmlEntity } = require('toolmetry');
+
+const result = htmlEntity.encodeAll('Cafe\\u0301');
+// "Caf&#233;"`,
+      },
+      {
+        title: 'Encode Specific Characters',
+        code: `const { htmlEntity } = require('toolmetry');
+
+const result = htmlEntity.encodeChars('Hello & "World"', ['&', '"']);
+// 'Hello &amp; &quot;World&quot;'`,
+      },
     ],
   },
   {
-    slug: "number-base",
-    name: "Number Base",
-    icon: "Binary",
-    description: "Convert numbers between binary, octal, decimal, and hexadecimal. Supports custom bases 2-36.",
-    category: "Math",
+    slug: 'number-base',
+    name: 'Number Base',
+    icon: 'Binary',
+    category: 'Math',
+    description: 'Convert between binary, octal, decimal, hex, and custom bases (2-36).',
+    importStatement: `const { numberBase } = require('toolmetry');`,
     functions: [
-      { name: "baseConvert", description: "Convert between bases", params: [{ name: "value", type: "string", required: true, description: "The number" }, { name: "fromBase", type: "number", required: true, description: "Source base" }, { name: "toBase", type: "number", required: true, description: "Target base" }], returns: "string" },
-      { name: "toBinary", description: "Convert to binary", params: [{ name: "value", type: "string|number", required: true, description: "The number" }], returns: "string" },
-      { name: "toHex", description: "Convert to hexadecimal", params: [{ name: "value", type: "string|number", required: true, description: "The number" }], returns: "string" },
+      { name: 'baseConvert', params: 'value: string, fromBase: number, toBase: number', returns: 'string', description: 'Convert between any bases (2-36)' },
+      { name: 'toBinary', params: 'value: string | number', returns: 'string', description: 'Convert decimal to binary' },
+      { name: 'toOctal', params: 'value: string | number', returns: 'string', description: 'Convert decimal to octal' },
+      { name: 'toHex', params: 'value: string | number', returns: 'string', description: 'Convert decimal to hexadecimal' },
+      { name: 'fromBinary', params: 'value: string', returns: 'string', description: 'Convert binary to decimal' },
+      { name: 'fromHex', params: 'value: string', returns: 'string', description: 'Convert hex to decimal' },
+      { name: 'convertAllBases', params: 'value: string | number, fromBase?: number', returns: 'Record<string, string>', description: 'Convert to all common bases' },
     ],
     examples: [
-      { title: "Convert between bases", code: `import { toBinary, toHex, convertAllBases } from 'toolmetry';\n\nconsole.log(toBinary(255)); // "11111111"\nconsole.log(toHex(255));    // "ff"` },
+      {
+        title: 'Basic Conversion',
+        code: `const { toHex, toBinary } = require('toolmetry');
+
+const hex = toHex(255);
+// "FF"
+
+const binary = toBinary(10);
+// "1010"`,
+      },
+      {
+        title: 'Custom Base Conversion',
+        code: `const { baseConvert } = require('toolmetry');
+
+const result = baseConvert('FF', 16, 10);
+// "255"`,
+      },
+      {
+        title: 'Convert to All Bases',
+        code: `const { convertAllBases } = require('toolmetry');
+
+const all = convertAllBases(255);
+// { decimal: "255", binary: "11111111", octal: "377", hex: "FF" }`,
+      },
     ],
   },
   {
-    slug: "text",
-    name: "Text Utilities",
-    icon: "Type",
-    description: "Case conversion, slugify, word/char counting, whitespace removal, and more text manipulation utilities.",
-    category: "Text",
+    slug: 'text',
+    name: 'Text Utilities',
+    icon: 'Type',
+    category: 'Text',
+    description: 'Case conversion, slugify, word/char counting, reverse, and more text utilities.',
+    importStatement: `const { text } = require('toolmetry');`,
     functions: [
-      { name: "toCamelCase", description: "Convert to camelCase", params: [{ name: "input", type: "string", required: true, description: "The string" }], returns: "string" },
-      { name: "toSnakeCase", description: "Convert to snake_case", params: [{ name: "input", type: "string", required: true, description: "The string" }], returns: "string" },
-      { name: "toKebabCase", description: "Convert to kebab-case", params: [{ name: "input", type: "string", required: true, description: "The string" }], returns: "string" },
-      { name: "slugify", description: "Generate a URL slug", params: [{ name: "input", type: "string", required: true, description: "The string" }], returns: "string" },
+      { name: 'toCamelCase', params: 'input: string', returns: 'string', description: 'Convert to camelCase' },
+      { name: 'toPascalCase', params: 'input: string', returns: 'string', description: 'Convert to PascalCase' },
+      { name: 'toSnakeCase', params: 'input: string', returns: 'string', description: 'Convert to snake_case' },
+      { name: 'toKebabCase', params: 'input: string', returns: 'string', description: 'Convert to kebab-case' },
+      { name: 'toConstantCase', params: 'input: string', returns: 'string', description: 'Convert to CONSTANT_CASE' },
+      { name: 'slugify', params: 'input: string', returns: 'string', description: 'Generate a URL-safe slug' },
+      { name: 'wordCount', params: 'input: string', returns: 'number', description: 'Count words in a string' },
+      { name: 'charCount', params: 'input: string, includeSpaces?: boolean', returns: 'number', description: 'Count characters' },
+      { name: 'reverse', params: 'input: string', returns: 'string', description: 'Reverse a string' },
+      { name: 'truncate', params: 'input: string, maxLength: number, suffix?: string', returns: 'string', description: 'Truncate with ellipsis' },
+      { name: 'removeExtraWhitespace', params: 'input: string', returns: 'string', description: 'Collapse multiple spaces' },
+      { name: 'removeLineBreaks', params: 'input: string', returns: 'string', description: 'Remove all line breaks' },
+      { name: 'escapeRegex', params: 'input: string', returns: 'string', description: 'Escape for use in regex' },
     ],
     examples: [
-      { title: "Case conversion", code: `import { toCamelCase, toSnakeCase, slugify } from 'toolmetry';\n\nconsole.log(toCamelCase('hello world'));  // "helloWorld"\nconsole.log(toSnakeCase('helloWorld'));  // "hello_world"\nconsole.log(slugify('Hello World! 123')); // "hello-world-123"` },
+      {
+        title: 'Case Conversion',
+        code: `const { toCamelCase, toPascalCase, toSnakeCase, toKebabCase, toConstantCase } = require('toolmetry');
+
+toCamelCase('hello world example');  // "helloWorldExample"
+toPascalCase('hello world example'); // "HelloWorldExample"
+toSnakeCase('helloWorldExample');    // "hello_world_example"
+toKebabCase('helloWorldExample');    // "hello-world-example"
+toConstantCase('hello world');       // "HELLO_WORLD"`,
+      },
+      {
+        title: 'Slugify',
+        code: `const { slugify } = require('toolmetry');
+
+slugify('My Blog Post Title!');
+// "my-blog-post-title"`,
+      },
+      {
+        title: 'Counting & Truncation',
+        code: `const { wordCount, charCount, truncate } = require('toolmetry');
+
+wordCount('Hello world example'); // 3
+charCount('Hello'); // 5
+truncate('A very long string here', 10); // "A ver..."`,
+      },
     ],
   },
   {
-    slug: "json",
-    name: "JSON Tools",
-    icon: "Braces",
-    description: "Format, minify, validate, and analyze JSON data with error position reporting. Flatten nested JSON to dot notation.",
-    category: "Data",
+    slug: 'json',
+    name: 'JSON Tools',
+    icon: 'Braces',
+    category: 'Data',
+    description: 'Format, minify, validate, flatten, and inspect JSON structures.',
+    importStatement: `const { json } = require('toolmetry');`,
     functions: [
-      { name: "jsonFormat", description: "Format/prettify JSON", params: [{ name: "input", type: "string", required: true, description: "JSON string" }], returns: "string" },
-      { name: "jsonMinify", description: "Minify JSON", params: [{ name: "input", type: "string", required: true, description: "JSON string" }], returns: "string" },
-      { name: "jsonValidate", description: "Validate JSON", params: [{ name: "input", type: "string", required: true, description: "JSON string" }], returns: "{ valid, error }" },
+      { name: 'jsonFormat', params: 'input: string, indent?: number', returns: 'string', description: 'Format/prettify JSON' },
+      { name: 'jsonMinify', params: 'input: string', returns: 'string', description: 'Minify JSON string' },
+      { name: 'jsonValidate', params: 'input: string', returns: '{ valid, error, position }', description: 'Validate JSON and return error info' },
+      { name: 'jsonGetType', params: 'input: string', returns: 'string', description: 'Get the type of a JSON value' },
+      { name: 'jsonStats', params: 'input: string', returns: '{ type, keys, depth, size }', description: 'Get statistics about a JSON structure' },
+      { name: 'jsonFlatten', params: 'input: string', returns: 'Record<string, unknown>', description: 'Flatten JSON to dot-notation object' },
     ],
     examples: [
-      { title: "Format and validate", code: `import { jsonFormat, jsonValidate } from 'toolmetry';\n\nconst formatted = jsonFormat('{"name":"Toolmetry"}');\nconsole.log(formatted);\n// {\n//   "name": "Toolmetry"\n// }` },
+      {
+        title: 'Format & Minify',
+        code: `const { jsonFormat, jsonMinify } = require('toolmetry');
+
+const ugly = '{"name":"John","age":30}';
+
+const pretty = jsonFormat(ugly, 2);
+// Formatted with 2-space indent
+
+const mini = jsonMinify(ugly);
+// '{"name":"John","age":30}'`,
+      },
+      {
+        title: 'Validate',
+        code: `const { jsonValidate } = require('toolmetry');
+
+const result = jsonValidate('{"valid": true}');
+// { valid: true, error: null, position: null }`,
+      },
+      {
+        title: 'Stats & Flatten',
+        code: `const { jsonStats, jsonFlatten } = require('toolmetry');
+
+const stats = jsonStats('{"a":1,"b":{"c":2}}');
+// { type: "object", keys: 2, depth: 2, size: 20 }
+
+const flat = jsonFlatten('{"a":{"b":1}}');
+// { "a.b": 1 }`,
+      },
     ],
   },
   {
-    slug: "password",
-    name: "Password Generator",
-    icon: "Lock",
-    description: "Generate secure passwords, passphrases, check strength, and batch generate. Uses cryptographically secure randomness.",
-    category: "Security",
+    slug: 'password',
+    name: 'Password Generator',
+    icon: 'Lock',
+    category: 'Security',
+    description: 'Generate secure random passwords with customizable options and strength checking.',
+    importStatement: `const { password } = require('toolmetry');`,
     functions: [
-      { name: "passwordGenerate", description: "Generate a secure password", params: [{ name: "options", type: "PasswordOptions", description: "Options object" }], returns: "string" },
-      { name: "passwordPassphrase", description: "Generate a passphrase", params: [{ name: "options", type: "object", description: "{ words, separator, capitalize }" }], returns: "string" },
-      { name: "passwordStrength", description: "Check password strength", params: [{ name: "password", type: "string", required: true, description: "The password" }], returns: "{ score, label, suggestions }" },
+      { name: 'passwordGenerate', params: 'options?: PasswordOptions', returns: 'string', description: 'Generate a random password' },
+      { name: 'passwordPassphrase', params: 'options?: { words?, separator?, capitalize? }', returns: 'string', description: 'Generate a passphrase' },
+      { name: 'passwordStrength', params: 'password: string', returns: '{ score, label, suggestions }', description: 'Check password strength' },
+      { name: 'passwordGenerateBatch', params: 'count: number, options?: PasswordOptions', returns: 'string[]', description: 'Generate multiple passwords' },
     ],
     examples: [
-      { title: "Generate passwords", code: `import { passwordGenerate, passwordStrength } from 'toolmetry';\n\nconst pwd = passwordGenerate({ length: 20, symbols: true });\nconsole.log(pwd); // "x8#Km2@pL9!nQ4&wR7"\n\nconst result = passwordStrength('mypassword123');\nconsole.log(result); // { score: 3, label: "Fair" }` },
+      {
+        title: 'Generate Password',
+        code: `const { passwordGenerate } = require('toolmetry');
+
+const pwd = passwordGenerate({ length: 20, symbols: true });
+// "aB3$xY9!kL2@mN5#pQ8"
+
+const simple = passwordGenerate({ length: 8, digits: true, symbols: false });
+// "aB3xY9kL"`,
+      },
+      {
+        title: 'Passphrase',
+        code: `const { passwordPassphrase } = require('toolmetry');
+
+const phrase = passwordPassphrase({ words: 4, separator: '-', capitalize: true });
+// "Brave-Cloud-Eagle-Flame"`,
+      },
+      {
+        title: 'Check Strength',
+        code: `const { passwordStrength } = require('toolmetry');
+
+const result = passwordStrength('MyP@ss123');
+// { score: 5, label: "Strong", suggestions: [] }`,
+      },
     ],
   },
   {
-    slug: "morse",
-    name: "Morse Code",
-    icon: "Radio",
-    description: "Encode text to Morse code and decode Morse back to text. Supports letters, numbers, and common punctuation.",
-    category: "Encoding",
+    slug: 'morse',
+    name: 'Morse Code',
+    icon: 'Radio',
+    category: 'Encoding',
+    description: 'Encode and decode Morse code with validation support.',
+    importStatement: `const { morse } = require('toolmetry');`,
     functions: [
-      { name: "morseEncode", description: "Encode to Morse code", params: [{ name: "input", type: "string", required: true, description: "The text" }], returns: "string" },
-      { name: "morseDecode", description: "Decode Morse code", params: [{ name: "input", type: "string", required: true, description: "Morse code" }], returns: "string" },
+      { name: 'morseEncode', params: 'input: string', returns: 'string', description: 'Encode text to Morse code' },
+      { name: 'morseDecode', params: 'input: string', returns: 'string', description: 'Decode Morse code to text' },
+      { name: 'morseIsValid', params: 'input: string', returns: 'boolean', description: 'Check if valid Morse code' },
     ],
     examples: [
-      { title: "Encode and decode", code: `import { morseEncode, morseDecode } from 'toolmetry';\n\nconsole.log(morseEncode('SOS')); // "... --- ..."\nconsole.log(morseDecode('... --- ...')); // "SOS"` },
+      {
+        title: 'Encode/Decode',
+        code: `const { morseEncode, morseDecode } = require('toolmetry');
+
+const encoded = morseEncode('HELLO WORLD');
+// ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+
+const decoded = morseDecode(encoded);
+// "HELLO WORLD"`,
+      },
+      {
+        title: 'Validation',
+        code: `const { morseIsValid } = require('toolmetry');
+
+morseIsValid('.... . .-.. .-.. ---'); // true
+morseIsValid('hello'); // false`,
+      },
     ],
   },
   {
-    slug: "roman",
-    name: "Roman Numerals",
-    icon: "Hash",
-    description: "Convert between Arabic numbers and Roman numerals (1-3999). Validate Roman numeral strings.",
-    category: "Math",
+    slug: 'roman',
+    name: 'Roman Numerals',
+    icon: 'Hash',
+    category: 'Math',
+    description: 'Convert between Arabic numbers and Roman numerals with validation.',
+    importStatement: `const { roman } = require('toolmetry');`,
     functions: [
-      { name: "romanToRoman", description: "Number to Roman", params: [{ name: "num", type: "number", required: true, description: "Number (1-3999)" }], returns: "string" },
-      { name: "romanFromRoman", description: "Roman to number", params: [{ name: "str", type: "string", required: true, description: "Roman numeral" }], returns: "number" },
+      { name: 'romanToRoman', params: 'num: number', returns: 'string', description: 'Convert number to Roman numeral (1-3999)' },
+      { name: 'romanFromRoman', params: 'str: string', returns: 'number', description: 'Convert Roman numeral to number' },
+      { name: 'romanIsValid', params: 'str: string', returns: 'boolean', description: 'Check if valid Roman numeral' },
     ],
     examples: [
-      { title: "Convert numbers", code: `import { romanToRoman, romanFromRoman } from 'toolmetry';\n\nconsole.log(romanToRoman(42));     // "XLII"\nconsole.log(romanFromRoman('XIV')); // 14` },
+      {
+        title: 'To Roman',
+        code: `const { romanToRoman } = require('toolmetry');
+
+romanToRoman(42);   // "XLII"
+romanToRoman(1999); // "MCMXCIX"`,
+      },
+      {
+        title: 'From Roman',
+        code: `const { romanFromRoman } = require('toolmetry');
+
+romanFromRoman('XLII');    // 42
+romanFromRoman('MCMXCIX'); // 1999`,
+      },
+      {
+        title: 'Validation',
+        code: `const { romanIsValid } = require('toolmetry');
+
+romanIsValid('XLII'); // true
+romanIsValid('ABC');  // false`,
+      },
     ],
   },
   {
-    slug: "cron",
-    name: "Cron Validator",
-    icon: "Clock",
-    description: "Validate and describe cron expressions with human-readable output. Supports standard 5-field cron plus aliases.",
-    category: "Utility",
+    slug: 'cron',
+    name: 'Cron Validator',
+    icon: 'Clock',
+    category: 'Utility',
+    description: 'Validate and describe cron expressions with human-readable output.',
+    importStatement: `const { cron } = require('toolmetry');`,
     functions: [
-      { name: "cronValidate", description: "Validate a cron expression", params: [{ name: "expression", type: "string", required: true, description: "The cron expression" }], returns: "{ valid, error }" },
-      { name: "cronDescribe", description: "Human-readable description", params: [{ name: "expression", type: "string", required: true, description: "The cron expression" }], returns: "string" },
+      { name: 'cronValidate', params: 'expression: string', returns: '{ valid, error, fields }', description: 'Validate a cron expression' },
+      { name: 'cronDescribe', params: 'expression: string', returns: 'string', description: 'Get human-readable description' },
     ],
     examples: [
-      { title: "Validate cron", code: `import { cronValidate, cronDescribe } from 'toolmetry';\n\nconst result = cronValidate('0 0 * * *');\nconsole.log(result); // { valid: true, error: null }\n\nconsole.log(cronDescribe('@daily'));` },
+      {
+        title: 'Validate',
+        code: `const { cronValidate } = require('toolmetry');
+
+const result = cronValidate('0 0 * * *');
+// { valid: true, error: null, fields: {...} }`,
+      },
+      {
+        title: 'Describe',
+        code: `const { cronDescribe } = require('toolmetry');
+
+cronDescribe('0 0 * * *');
+// "Cron: 0 0 * * * (at minute 0, at hour 0)"
+
+cronDescribe('@daily');
+// "Runs once a day (at midnight)"`,
+      },
     ],
   },
   {
-    slug: "diff",
-    name: "Diff Checker",
-    icon: "GitCompare",
-    description: "Compare two strings line by line and find differences with unified diff output. Uses LCS-based algorithm.",
-    category: "Utility",
+    slug: 'diff',
+    name: 'Diff Checker',
+    icon: 'GitCompare',
+    category: 'Utility',
+    description: 'Compare texts line by line and find differences.',
+    importStatement: `const { diff } = require('toolmetry');`,
     functions: [
-      { name: "diffCheck", description: "Compare two strings", params: [{ name: "oldText", type: "string", required: true, description: "Original" }, { name: "newText", type: "string", required: true, description: "Modified" }], returns: "{ lines, stats }" },
-      { name: "diffIsSame", description: "Check if strings are identical", params: [{ name: "a", type: "string", required: true, description: "First string" }, { name: "b", type: "string", required: true, description: "Second string" }], returns: "boolean" },
+      { name: 'diffCheck', params: 'oldText: string, newText: string', returns: '{ lines, stats }', description: 'Compare two strings line by line' },
+      { name: 'diffUnified', params: 'oldText: string, newText: string, oldLabel?, newLabel?', returns: 'string', description: 'Generate unified diff string' },
+      { name: 'diffIsSame', params: 'a: string, b: string', returns: 'boolean', description: 'Check if two strings are identical' },
     ],
     examples: [
-      { title: "Compare texts", code: `import { diffCheck } from 'toolmetry';\n\nconst result = diffCheck('hello world', 'hello earth');\nconsole.log(result.stats); // { added: 1, removed: 1, unchanged: 1 }` },
+      {
+        title: 'Line-by-Line Diff',
+        code: `const { diffCheck } = require('toolmetry');
+
+const result = diffCheck('Hello\\nWorld', 'Hello\\nEarth');
+// { lines: [...], stats: { added: 1, removed: 1, unchanged: 1 } }`,
+      },
+      {
+        title: 'Unified Diff',
+        code: `const { diffUnified } = require('toolmetry');
+
+const unified = diffUnified('Hello\\nWorld', 'Hello\\nEarth');
+// "--- original\\n+++ modified\\n  Hello\\n- World\\n+ Earth"`,
+      },
+      {
+        title: 'Quick Comparison',
+        code: `const { diffIsSame } = require('toolmetry');
+
+diffIsSame('hello', 'hello'); // true
+diffIsSame('hello', 'world'); // false`,
+      },
     ],
   },
   {
-    slug: "lorem",
-    name: "Lorem Ipsum",
-    icon: "AlignLeft",
-    description: "Generate placeholder text for design and development. Generate words, sentences, and paragraphs.",
-    category: "Content",
+    slug: 'lorem',
+    name: 'Lorem Ipsum',
+    icon: 'AlignLeft',
+    category: 'Content',
+    description: 'Generate placeholder text for design and development.',
+    importStatement: `const { lorem } = require('toolmetry');`,
     functions: [
-      { name: "loremWords", description: "Generate lorem words", params: [{ name: "count", type: "number", description: "Word count (default: 10)" }], returns: "string" },
-      { name: "loremParagraphs", description: "Generate lorem paragraphs", params: [{ name: "count", type: "number", description: "Paragraph count (default: 2)" }], returns: "string" },
+      { name: 'loremWords', params: 'count?: number', returns: 'string', description: 'Generate lorem ipsum words' },
+      { name: 'loremSentences', params: 'count?: number', returns: 'string', description: 'Generate lorem ipsum sentences' },
+      { name: 'loremParagraphs', params: 'count?: number', returns: 'string', description: 'Generate lorem ipsum paragraphs' },
     ],
     examples: [
-      { title: "Generate placeholder text", code: `import { loremWords, loremParagraphs } from 'toolmetry';\n\nconsole.log(loremWords(10));      // 10 words\nconsole.log(loremParagraphs(2));  // 2 paragraphs` },
+      {
+        title: 'Generate Words',
+        code: `const { loremWords } = require('toolmetry');
+
+const words = loremWords(10);
+// "lorem ipsum dolor sit amet consectetur adipiscing elit"`,
+      },
+      {
+        title: 'Generate Sentences',
+        code: `const { loremSentences } = require('toolmetry');
+
+const sentences = loremSentences(2);
+// Two sentences of lorem ipsum text`,
+      },
+      {
+        title: 'Generate Paragraphs',
+        code: `const { loremParagraphs } = require('toolmetry');
+
+const paragraphs = loremParagraphs(3);
+// Three paragraphs of lorem ipsum text`,
+      },
     ],
   },
 ];
 
-export const categories = ["Encoding", "Security", "Identity", "Design", "Math", "Text", "Data", "Utility", "Content"];
-
-export function getToolBySlug(slug: string): ToolDef | undefined {
+export function getToolBySlug(slug: string): ToolInfo | undefined {
   return tools.find(t => t.slug === slug);
 }
 
-export function getToolsByCategory(category: string): ToolDef[] {
+export function getToolsByCategory(category: Category): ToolInfo[] {
   return tools.filter(t => t.category === category);
 }
+
+export const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  FileCode,
+  Link,
+  Shield,
+  KeyRound,
+  Fingerprint,
+  Palette,
+  Code2,
+  Binary,
+  Type,
+  Braces,
+  Lock,
+  Radio,
+  Hash,
+  Clock,
+  GitCompare,
+  AlignLeft,
+  LockKeyhole,
+  Shuffle,
+};

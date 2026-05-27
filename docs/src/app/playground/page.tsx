@@ -1,209 +1,193 @@
-"use client";
+'use client';
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import { playgroundFunctions } from "../../lib/toolmetry-browser";
-import { useState } from "react";
+import { useState, useMemo } from 'react';
+import { tools, iconMap, categoryColors } from '@/lib/tools-data';
+import { TryItLive } from '@/app/components/TryItLive';
+import { CodeBlock } from '@/app/components/CodeBlock';
+import { Play, ChevronDown } from 'lucide-react';
+import type { Category } from '@/lib/tools-data';
 
 export default function PlaygroundPage() {
-  const categories = [...new Set(playgroundFunctions.map(f => f.tool))];
-  const [activeCategory, setActiveCategory] = useState(categories[0]);
-  const [selectedIdx, setSelectedIdx] = useState(0);
-  const [paramValues, setParamValues] = useState<string[]>([]);
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [selectedTool, setSelectedTool] = useState('base64');
+  const [categoryFilter, setCategoryFilter] = useState<Category | 'All'>('All');
+  const tool = tools.find(t => t.slug === selectedTool);
 
-  const toolFuncs = playgroundFunctions.filter(f => f.tool === activeCategory);
-  const currentFunc = toolFuncs[selectedIdx] || toolFuncs[0];
+  const filteredTools = useMemo(() => {
+    if (categoryFilter === 'All') return tools;
+    return tools.filter(t => t.category === categoryFilter);
+  }, [categoryFilter]);
 
-  const handleCategoryChange = (cat: string) => {
-    setActiveCategory(cat);
-    setSelectedIdx(0);
-    const fn = playgroundFunctions.find(f => f.tool === cat);
-    if (fn) setParamValues(fn.params.map(p => p.default || ""));
-    setOutput("");
-  };
-
-  const handleSelectChange = (idx: number) => {
-    setSelectedIdx(idx);
-    const fn = toolFuncs[idx];
-    if (fn) setParamValues(fn.params.map(p => p.default || ""));
-    setOutput("");
-  };
-
-  const handleRun = async () => {
-    if (!currentFunc) return;
-    setLoading(true);
-    try {
-      const result = await currentFunc.execute(paramValues);
-      setOutput(String(result));
-    } catch (e: any) {
-      setOutput("Error: " + (e.message || String(e)));
-    }
-    setLoading(false);
-  };
+  const allCategories: (Category | 'All')[] = ['All', ...new Set(tools.map(t => t.category))];
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-surface)" }}>
-      <Navbar />
-
-      <div style={{ paddingTop: "100px", maxWidth: "1200px", margin: "0 auto", padding: "100px 24px 60px" }}>
-        <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "8px", letterSpacing: "-0.03em" }}>Playground</h1>
-        <p style={{ fontSize: "15px", color: "var(--color-on-surface-variant)", marginBottom: "32px" }}>
-          Test toolmetry functions directly in your browser. Uses the actual package logic.
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
+          <span className="gradient-text">Playground</span>
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Try any toolmetry module right in your browser. Select a tool, enter input, and see the output in real-time.
         </p>
-
-        <div style={{ display: "flex", gap: "8px", marginBottom: "24px", flexWrap: "wrap" }}>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => handleCategoryChange(cat)}
-              style={{
-                padding: "6px 14px",
-                borderRadius: "8px",
-                fontSize: "13px",
-                fontWeight: 500,
-                border: "1px solid var(--color-outline-variant)",
-                background: activeCategory === cat ? "var(--color-primary)" : "var(--color-surface-container)",
-                color: activeCategory === cat ? "#fff" : "var(--color-on-surface-variant)",
-                cursor: "pointer",
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-          <div style={{
-            border: "1px solid var(--color-outline-variant)",
-            borderRadius: "12px",
-            overflow: "hidden",
-            background: "var(--color-surface-container)",
-          }}>
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--color-outline-variant)" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 600, marginBottom: "12px" }}>Input</h3>
-              <select
-                value={selectedIdx}
-                onChange={e => handleSelectChange(Number(e.target.value))}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--color-outline-variant)",
-                  background: "var(--color-surface)",
-                  color: "var(--color-on-surface)",
-                  fontSize: "13px",
-                  fontFamily: "var(--font-mono)",
-                  marginBottom: "12px",
-                }}
-              >
-                {toolFuncs.map((f, i) => (
-                  <option key={i} value={i}>{f.name}</option>
-                ))}
-              </select>
-
-              {currentFunc && currentFunc.params.map((param, i) => (
-                <div key={param.name} style={{ marginBottom: "10px" }}>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "var(--color-on-surface-variant)", marginBottom: "4px" }}>
-                    {param.name}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={param.placeholder}
-                    value={paramValues[i] || ""}
-                    onChange={e => {
-                      const newVals = [...paramValues];
-                      newVals[i] = e.target.value;
-                      setParamValues(newVals);
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--color-outline-variant)",
-                      background: "var(--color-surface)",
-                      color: "var(--color-on-surface)",
-                      fontSize: "13px",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  />
-                </div>
-              ))}
-
-              <button
-                onClick={handleRun}
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  background: "var(--color-primary)",
-                  color: "#fff",
-                  border: "none",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  cursor: loading ? "wait" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                }}
-              >
-                {loading ? "Running..." : "Run"}
-              </button>
-            </div>
-
-            {currentFunc && (
-              <div style={{ padding: "16px 20px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 600, color: "#6c7086", marginBottom: "6px", textTransform: "uppercase" }}>Code</div>
-                <pre style={{
-                  margin: 0,
-                  color: "#cdd6f4",
-                  fontSize: "12px",
-                  fontFamily: "var(--font-mono)",
-                  lineHeight: 1.6,
-                  background: "#1e1e2e",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "1px solid #313244",
-                }}>
-                  {`import { ${currentFunc.name.split(" ")[0]} } from 'toolmetry';\n\nconst result = ${currentFunc.name.split(" ")[0]}(${currentFunc.params.map((p, i) => paramValues[i] ? `"${paramValues[i]}"` : `"${p.placeholder}"`).join(", ")});`}
-                </pre>
-              </div>
-            )}
-          </div>
-
-          <div style={{
-            border: "1px solid var(--color-outline-variant)",
-            borderRadius: "12px",
-            overflow: "hidden",
-            background: "#1e1e2e",
-          }}>
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid #313244" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#cdd6f4" }}>Output</h3>
-            </div>
-            <div style={{ padding: "20px" }}>
-              {output ? (
-                <pre style={{
-                  margin: 0,
-                  color: output.startsWith("Error") ? "#f38ba8" : "#a6e3a1",
-                  fontSize: "14px",
-                  fontFamily: "var(--font-mono)",
-                  lineHeight: 1.7,
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}>
-                  {output}
-                </pre>
-              ) : (
-                <p style={{ color: "#6c7086", fontSize: "14px" }}>
-                  Select a function and click Run to see the output.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
-      <Footer />
+      <div className="lg:flex lg:gap-6">
+        {/* Left Panel - Tool Selection */}
+        <div className="lg:w-72 shrink-0 mb-6 lg:mb-0">
+          <div className="sticky top-20 space-y-4">
+            {/* Category Filter */}
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Category</label>
+              <div className="flex flex-wrap gap-1">
+                {allCategories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setCategoryFilter(cat)}
+                    className={`rounded-md px-2 py-1 text-[11px] font-semibold transition-colors ${
+                      categoryFilter === cat
+                        ? 'gradient-bg text-white shadow-sm'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tool selector */}
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Select a Tool</label>
+              <div className="relative">
+                <select
+                  value={selectedTool}
+                  onChange={e => setSelectedTool(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 appearance-none pr-8"
+                >
+                  {filteredTools.map(t => (
+                    <option key={t.slug} value={t.slug}>{t.name}</option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Quick nav */}
+            <div className="space-y-0.5 max-h-[calc(100vh-28rem)] overflow-y-auto custom-scrollbar rounded-lg border border-border p-1">
+              {filteredTools.map(t => {
+                const Icon = iconMap[t.icon];
+                const isActive = selectedTool === t.slug;
+                return (
+                  <button
+                    key={t.slug}
+                    onClick={() => setSelectedTool(t.slug)}
+                    className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-left transition-colors ${
+                      isActive
+                        ? 'bg-brand/10 text-brand font-medium dark:bg-brand/20 dark:text-brand-accent'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {Icon && <Icon size={15} className="shrink-0" />}
+                    <span className="truncate flex-1">{t.name}</span>
+                    {isActive && <Play size={12} className="shrink-0 text-brand" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Content & Output */}
+        <div className="min-w-0 flex-1">
+          {tool && (
+            <div className="space-y-6">
+              {/* Tool Info Header */}
+              <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-accent">
+                  {(() => { const Icon = iconMap[tool.icon]; return Icon ? <Icon size={20} /> : null; })()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl font-bold text-foreground">{tool.name}</h2>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${categoryColors[tool.category]}`}>
+                      {tool.category}
+                    </span>
+                    <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Split-screen: Interactive + Code */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* Interactive Area */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Play size={14} className="text-brand" /> Interactive
+                  </h3>
+                  <TryItLive toolSlug={tool.slug} />
+                </div>
+
+                {/* Code Reference */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3">Code Reference</h3>
+                  <div className="space-y-3">
+                    <CodeBlock code={tool.importStatement} title="Import" />
+                    {tool.examples.slice(0, 2).map((example, i) => (
+                      <CodeBlock key={i} code={example.code} title={example.title} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Full API Reference */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Full API Reference</h3>
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/50">
+                          <th className="text-left px-4 py-2.5 font-semibold text-foreground">Function</th>
+                          <th className="text-left px-4 py-2.5 font-semibold text-foreground">Parameters</th>
+                          <th className="text-left px-4 py-2.5 font-semibold text-foreground">Returns</th>
+                          <th className="text-left px-4 py-2.5 font-semibold text-foreground">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tool.functions.map((fn, i) => (
+                          <tr key={i} className="border-b border-border last:border-0">
+                            <td className="px-4 py-2">
+                              <code className="text-xs font-mono font-semibold text-brand">{fn.name}</code>
+                            </td>
+                            <td className="px-4 py-2">
+                              <code className="text-xs font-mono text-muted-foreground">{fn.params || '—'}</code>
+                            </td>
+                            <td className="px-4 py-2">
+                              <code className="text-xs font-mono text-muted-foreground">{fn.returns}</code>
+                            </td>
+                            <td className="px-4 py-2 text-muted-foreground text-xs">{fn.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* More Code Examples */}
+              {tool.examples.length > 2 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3">More Examples</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {tool.examples.slice(2).map((example, i) => (
+                      <CodeBlock key={i} code={example.code} title={example.title} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
