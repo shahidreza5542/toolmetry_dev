@@ -1,8 +1,65 @@
 'use client';
 
+/**
+ * TryItLive — Real-time testing using the actual `toolmetry` npm package.
+ *
+ * Every function call goes directly to `import { ... } from 'toolmetry'`.
+ * No wrappers, no manual logic — this IS the real package being tested.
+ *
+ * npm i toolmetry   →   v1.0.3
+ */
+
 import { useState, useCallback } from 'react';
-import { Copy, Check, Play, Loader2 } from 'lucide-react';
-import { runToolFunction } from '@/lib/toolmetry-browser';
+import { Copy, Check, Play, Loader2, Package } from 'lucide-react';
+
+// ─── DIRECT IMPORTS FROM THE TOOLMETRY NPM PACKAGE ──────────────────────────
+import {
+  base64Encode,
+  base64Decode,
+  urlEncode,
+  urlDecode,
+  urlBuildQuery,
+  urlParseQuery,
+  hashAsync,
+  hashAll,
+  jwtDecode,
+  uuidV4Batch,
+  aesEncryptAsync,
+  aesDecryptAsync,
+  randomString,
+  randomInt,
+  randomHex,
+  randomAlphanumeric,
+  randomBoolean,
+  randomFloat,
+  colorConvert,
+  htmlEntityEncode,
+  htmlEntityDecode,
+  convertAllBases,
+  toCamelCase,
+  toPascalCase,
+  toSnakeCase,
+  toKebabCase,
+  toConstantCase,
+  slugify,
+  wordCount,
+  charCount,
+  reverse,
+  jsonFormat,
+  jsonMinify,
+  jsonValidate,
+  passwordGenerate,
+  morseEncode,
+  morseDecode,
+  romanToRoman,
+  romanFromRoman,
+  cronValidate,
+  cronDescribe,
+  diffCheck,
+  loremWords,
+  loremSentences,
+  loremParagraphs,
+} from 'toolmetry';
 
 interface TryItLiveProps {
   toolSlug: string;
@@ -22,10 +79,231 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
     setTimeout(() => setCopied(false), 2000);
   }, [output]);
 
+  // ─── REAL TOOLMETRY PACKAGE CALLS ────────────────────────────────────────
+  // Every case directly calls a function imported from `import {} from 'toolmetry'`
   const runTool = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await runToolFunction(toolSlug, mode, input, secret);
+      let result: string;
+
+      switch (toolSlug) {
+        // ── Base64 (toolmetry.base64Encode / base64Decode) ──────────────
+        case 'base64':
+          result = mode === 'decode' ? base64Decode(input) : base64Encode(input);
+          break;
+
+        // ── URL (toolmetry.urlEncode / urlDecode / urlBuildQuery / urlParseQuery) ──
+        case 'url':
+          if (mode === 'decode') {
+            result = urlDecode(input);
+          } else if (mode === 'buildQuery') {
+            try {
+              const obj = JSON.parse(input);
+              result = urlBuildQuery(obj);
+            } catch {
+              result = 'Error: Input must be a JSON object like {"name":"John","age":30}';
+            }
+          } else if (mode === 'parseQuery') {
+            result = JSON.stringify(urlParseQuery(input), null, 2);
+          } else {
+            result = urlEncode(input);
+          }
+          break;
+
+        // ── Hash (toolmetry.hashAsync / hashAll) ────────────────────────
+        case 'hash': {
+          if (mode === 'all') {
+            // hashAll() is sync and needs Node crypto, so use hashAsync for each
+            const [sha1, sha256, sha384, sha512] = await Promise.all([
+              hashAsync(input, 'SHA-1'),
+              hashAsync(input, 'SHA-256'),
+              hashAsync(input, 'SHA-384'),
+              hashAsync(input, 'SHA-512'),
+            ]);
+            result = JSON.stringify({ sha1, sha256, sha384, sha512 }, null, 2);
+          } else {
+            try {
+              result = await hashAsync(input, mode || 'SHA-256');
+            } catch {
+              result = `Error: Algorithm "${mode}" not supported in browser. Use SHA-1, SHA-256, SHA-384, or SHA-512.`;
+            }
+          }
+          break;
+        }
+
+        // ── JWT (toolmetry.jwtDecode) ───────────────────────────────────
+        case 'jwt':
+          try {
+            const decoded = jwtDecode(input);
+            result = JSON.stringify(decoded, null, 2);
+          } catch (e) {
+            result = `Error: ${e instanceof Error ? e.message : 'Invalid JWT'}`;
+          }
+          break;
+
+        // ── UUID (toolmetry.uuidV4Batch) ────────────────────────────────
+        case 'uuid': {
+          const count = Math.max(1, Math.min(10, parseInt(input) || 1));
+          const uuids = uuidV4Batch(count);
+          result = count === 1 ? uuids[0] : uuids.join('\n');
+          break;
+        }
+
+        // ── AES-256 Encrypt/Decrypt (toolmetry.aesEncryptAsync / aesDecryptAsync) ──
+        case 'encrypt':
+          if (!input) { result = 'Error: Enter text to encrypt/decrypt'; break; }
+          if (!secret) { result = 'Error: Enter a secret key'; break; }
+          try {
+            result = mode === 'decrypt'
+              ? await aesDecryptAsync(input, secret)
+              : await aesEncryptAsync(input, secret);
+          } catch (e) {
+            result = `Error: ${e instanceof Error ? e.message : 'Encryption failed'}`;
+          }
+          break;
+
+        // ── Random (toolmetry.randomString / randomInt / randomHex / ...) ──
+        case 'random':
+          switch (mode) {
+            case 'int': {
+              const parts = input.split(',').map(s => parseInt(s.trim()));
+              result = String(randomInt(parts[0] || 1, parts[1] || 100));
+              break;
+            }
+            case 'hex':
+              result = randomHex(Math.max(1, Math.min(128, parseInt(input) || 32)));
+              break;
+            case 'float': {
+              const parts = input.split(',').map(s => parseFloat(s.trim()));
+              result = String(randomFloat(parts[0] || 0, parts[1] || 1, parts[2] || 4));
+              break;
+            }
+            case 'boolean':
+              result = String(randomBoolean());
+              break;
+            case 'alphanumeric':
+              result = randomAlphanumeric(Math.max(1, Math.min(128, parseInt(input) || 16)));
+              break;
+            default:
+              result = randomString(Math.max(1, Math.min(128, parseInt(input) || 16)), { lowercase: true, uppercase: true, digits: true });
+          }
+          break;
+
+        // ── Color (toolmetry.colorConvert) ──────────────────────────────
+        case 'color':
+          try {
+            result = JSON.stringify(colorConvert(input), null, 2);
+          } catch (e) {
+            result = `Error: ${e instanceof Error ? e.message : 'Invalid color'}`;
+          }
+          break;
+
+        // ── HTML Entity (toolmetry.htmlEntityEncode / htmlEntityDecode) ──
+        case 'html-entity':
+          result = mode === 'decode' ? htmlEntityDecode(input) : htmlEntityEncode(input);
+          break;
+
+        // ── Number Base (toolmetry.convertAllBases) ─────────────────────
+        case 'number-base': {
+          const fromBase = mode === 'binary' ? 2 : mode === 'hex' ? 16 : mode === 'octal' ? 8 : 10;
+          try {
+            result = JSON.stringify(convertAllBases(input, fromBase), null, 2);
+          } catch (e) {
+            result = `Error: ${e instanceof Error ? e.message : 'Invalid number'}`;
+          }
+          break;
+        }
+
+        // ── Text (toolmetry.toCamelCase / toSnakeCase / ...) ────────────
+        case 'text':
+          switch (mode || 'camel') {
+            case 'camel': result = toCamelCase(input); break;
+            case 'pascal': result = toPascalCase(input); break;
+            case 'snake': result = toSnakeCase(input); break;
+            case 'kebab': result = toKebabCase(input); break;
+            case 'constant': result = toConstantCase(input); break;
+            case 'slug': result = slugify(input); break;
+            case 'reverse': result = reverse(input); break;
+            case 'count': {
+              const words = wordCount(input);
+              const chars = charCount(input);
+              const charsNoSpace = charCount(input, false);
+              result = `Words: ${words}\nCharacters (with spaces): ${chars}\nCharacters (no spaces): ${charsNoSpace}`;
+              break;
+            }
+            default: result = input;
+          }
+          break;
+
+        // ── JSON (toolmetry.jsonFormat / jsonMinify / jsonValidate) ─────
+        case 'json':
+          if (mode === 'minify') {
+            result = jsonMinify(input);
+          } else if (mode === 'validate') {
+            const v = jsonValidate(input);
+            result = v.valid ? 'Valid JSON!' : `Invalid JSON: ${v.error}`;
+          } else {
+            result = jsonFormat(input, 2);
+          }
+          break;
+
+        // ── Password (toolmetry.passwordGenerate) ──────────────────────
+        case 'password': {
+          const length = Math.max(8, Math.min(128, parseInt(input) || 16));
+          result = passwordGenerate({ length, symbols: true });
+          break;
+        }
+
+        // ── Morse (toolmetry.morseEncode / morseDecode) ────────────────
+        case 'morse':
+          result = mode === 'decode' ? morseDecode(input) : morseEncode(input);
+          break;
+
+        // ── Roman (toolmetry.romanToRoman / romanFromRoman) ────────────
+        case 'roman':
+          result = mode === 'fromRoman' ? String(romanFromRoman(input)) : romanToRoman(parseInt(input) || 1);
+          break;
+
+        // ── Cron (toolmetry.cronValidate / cronDescribe) ───────────────
+        case 'cron':
+          if (input.startsWith('@')) {
+            result = cronDescribe(input);
+          } else {
+            const v = cronValidate(input);
+            result = v.valid ? `Valid: true\n${cronDescribe(input)}` : `Valid: false\nError: ${v.error}`;
+          }
+          break;
+
+        // ── Diff (toolmetry.diffCheck) ─────────────────────────────────
+        case 'diff': {
+          const parts = input.split('---');
+          const oldText = (parts[0] || '').trim();
+          const newText = (parts[1] || '').trim();
+          if (!oldText && !newText) {
+            result = 'Enter two texts separated by "---" on a new line.\nExample:\nHello World\n---\nHello Earth';
+          } else {
+            const d = diffCheck(oldText, newText);
+            const lines = d.lines.map((l: { type: string; content: string }) =>
+              `${l.type === 'added' ? '+ ' : l.type === 'removed' ? '- ' : '  '}${l.content}`
+            ).join('\n');
+            result = `${lines}\n\nStats: +${d.stats.added} -${d.stats.removed} unchanged:${d.stats.unchanged}`;
+          }
+          break;
+        }
+
+        // ── Lorem (toolmetry.loremWords / loremSentences / loremParagraphs) ──
+        case 'lorem': {
+          const count = Math.max(1, Math.min(100, parseInt(input) || 5));
+          if (mode === 'sentences') result = loremSentences(count);
+          else if (mode === 'paragraphs') result = loremParagraphs(count);
+          else result = loremWords(count);
+          break;
+        }
+
+        default:
+          result = 'Interactive demo not available for this tool.';
+      }
+
       setOutput(result);
     } catch (e) {
       setOutput(`Error: ${e instanceof Error ? e.message : 'Something went wrong'}`);
@@ -99,12 +377,17 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* Header — clearly shows this uses real package imports */}
       <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center gap-2">
         <Play size={14} className="text-brand" />
         <h3 className="text-sm font-semibold text-card-foreground">Try It Live</h3>
-        <span className="ml-auto text-[10px] font-mono text-muted-foreground">powered by toolmetry</span>
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono text-brand bg-brand/10 dark:bg-brand/20 rounded-full px-2 py-0.5">
+          <Package size={9} /> import {'{'} ... {'}'} from &apos;toolmetry&apos;
+        </span>
       </div>
+
       <div className="p-4 space-y-3">
+        {/* Mode buttons */}
         {modes.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {modes.map(m => (
@@ -123,6 +406,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           </div>
         )}
 
+        {/* Input */}
         {toolSlug !== 'uuid' && (
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Input</label>
@@ -136,6 +420,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           </div>
         )}
 
+        {/* Secret key for encrypt */}
         {toolSlug === 'encrypt' && (
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Secret Key</label>
@@ -149,6 +434,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           </div>
         )}
 
+        {/* Run button */}
         <button
           onClick={runTool}
           disabled={loading}
@@ -158,10 +444,13 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           {toolSlug === 'uuid' ? 'Generate UUID' : 'Run'}
         </button>
 
+        {/* Output */}
         {output && (
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-muted-foreground">Output</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                Output <span className="text-brand/60 font-mono text-[10px]">via toolmetry</span>
+              </label>
               <button
                 onClick={handleCopy}
                 className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:bg-brand/10 rounded px-1.5 py-0.5 transition-colors"
