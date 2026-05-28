@@ -47,7 +47,7 @@ export const tools: ToolInfo[] = [
     icon: 'FileCode',
     category: 'Encoding',
     description: 'Encode and decode Base64 strings, with URL-safe and buffer support.',
-    importStatement: `const { base64 } = require('toolmetry');`,
+    importStatement: `import { base64 } from 'toolmetry';`,
     functions: [
       { name: 'base64.encode', params: 'input: string, encoding?: string', returns: 'string', description: 'Encode a string to Base64' },
       { name: 'base64.decode', params: 'input: string, encoding?: string', returns: 'string', description: 'Decode a Base64 string' },
@@ -60,7 +60,7 @@ export const tools: ToolInfo[] = [
     examples: [
       {
         title: 'Basic Encode/Decode',
-        code: `const { base64 } = require('toolmetry');
+        code: `import { base64 } from 'toolmetry';
 
 const encoded = base64.encode('Hello, World!');
 // "SGVsbG8sIFdvcmxkIQ=="
@@ -70,7 +70,7 @@ const decoded = base64.decode(encoded);
       },
       {
         title: 'URL-Safe Base64',
-        code: `const { base64 } = require('toolmetry');
+        code: `import { base64 } from 'toolmetry';
 
 const urlSafe = base64.encodeURL('Hello+World/Test=');
 // "SGVsbG8rV29ybGQvVGVzdA"
@@ -80,14 +80,14 @@ const original = base64.decodeURL(urlSafe);
       },
       {
         title: 'Validation',
-        code: `const { base64 } = require('toolmetry');
+        code: `import { base64 } from 'toolmetry';
 
 base64.isValid('SGVsbG8='); // true
 base64.isValid('not-base64!'); // false`,
       },
       {
         title: 'Buffer Operations',
-        code: `const { base64 } = require('toolmetry');
+        code: `import { base64 } from 'toolmetry';
 
 const buffer = new Uint8Array([72, 101, 108, 108, 111]);
 const encoded = base64.encodeBuffer(buffer);
@@ -104,7 +104,7 @@ const decoded = base64.decodeToBuffer(encoded);
     icon: 'Link',
     category: 'Encoding',
     description: 'Encode and decode URL components, build and parse query strings effortlessly.',
-    importStatement: `const { url } = require('toolmetry');`,
+    importStatement: `import { url } from 'toolmetry';`,
     functions: [
       { name: 'url.encode', params: 'input: string', returns: 'string', description: 'URL-encode a string' },
       { name: 'url.decode', params: 'input: string', returns: 'string', description: 'Decode a URL-encoded string' },
@@ -114,7 +114,7 @@ const decoded = base64.decodeToBuffer(encoded);
     examples: [
       {
         title: 'Encode/Decode',
-        code: `const { url } = require('toolmetry');
+        code: `import { url } from 'toolmetry';
 
 const encoded = url.encode('hello world&foo=bar');
 // "hello%20world%26foo%3Dbar"
@@ -124,14 +124,14 @@ const decoded = url.decode(encoded);
       },
       {
         title: 'Build Query String',
-        code: `const { url } = require('toolmetry');
+        code: `import { url } from 'toolmetry';
 
 const qs = url.buildQuery({ name: 'John', age: 30, active: true });
 // "?name=John&age=30&active=true"`,
       },
       {
         title: 'Parse Query String',
-        code: `const { url } = require('toolmetry');
+        code: `import { url } from 'toolmetry';
 
 const params = url.parseQuery('?name=John&age=30');
 // { name: "John", age: "30" }`,
@@ -144,7 +144,7 @@ const params = url.parseQuery('?name=John&age=30');
     icon: 'Shield',
     category: 'Security',
     description: 'Generate hashes with MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC support.',
-    importStatement: `const { hash } = require('toolmetry');`,
+    importStatement: `import { hash } from 'toolmetry';`,
     functions: [
       { name: 'hashGenerate', params: 'input: string, algorithm?: string, encoding?: string', returns: 'string', description: 'Generate a hash (Node.js sync)' },
       { name: 'hashAsync', params: 'input: string, algorithm?: string, encoding?: string', returns: 'Promise<string>', description: 'Async hash (browser + Node)' },
@@ -154,28 +154,28 @@ const params = url.parseQuery('?name=John&age=30');
     examples: [
       {
         title: 'SHA-256 Hash',
-        code: `const { hashGenerate } = require('toolmetry');
+        code: `import { hashGenerate } from 'toolmetry';
 
 const sha256 = hashGenerate('hello', 'sha256');
 // "2cf24dba5fb0a30e26e83b2ac5b9e29e..."`,
       },
       {
         title: 'Async Hash (Browser)',
-        code: `const { hashAsync } = require('toolmetry');
+        code: `import { hashAsync } from 'toolmetry';
 
 const hash = await hashAsync('hello', 'SHA-256');
 // Works in both browser and Node.js`,
       },
       {
         title: 'All Hashes at Once',
-        code: `const { hashAll } = require('toolmetry');
+        code: `import { hashAll } from 'toolmetry';
 
 const all = hashAll('hello');
 // { md5: "...", sha1: "...", sha256: "...", sha384: "...", sha512: "..." }`,
       },
       {
         title: 'HMAC',
-        code: `const { hmacGenerate } = require('toolmetry');
+        code: `import { hmacGenerate } from 'toolmetry';
 
 const hmac = hmacGenerate('message', 'secret-key', 'sha256');
 // Node.js only`,
@@ -188,7 +188,7 @@ const hmac = hmacGenerate('message', 'secret-key', 'sha256');
     icon: 'KeyRound',
     category: 'Security',
     description: 'Decode and inspect JWT tokens without verification. Check expiry and claims.',
-    importStatement: `const { jwt } = require('toolmetry');`,
+    importStatement: `import { jwt } from 'toolmetry';`,
     functions: [
       { name: 'jwt.decode', params: 'token: string', returns: '{ header, payload, signature }', description: 'Decode a JWT into its parts' },
       { name: 'jwt.decodeHeader', params: 'token: string', returns: 'object', description: 'Decode only the header' },
@@ -201,7 +201,7 @@ const hmac = hmacGenerate('message', 'secret-key', 'sha256');
     examples: [
       {
         title: 'Decode a JWT',
-        code: `const { jwt } = require('toolmetry');
+        code: `import { jwt } from 'toolmetry';
 
 const token = 'eyJhbGciOiJIUzI1NiIs...';
 
@@ -211,14 +211,14 @@ const { header, payload, signature } = jwt.decode(token);
       },
       {
         title: 'Check Expiry',
-        code: `const { jwt } = require('toolmetry');
+        code: `import { jwt } from 'toolmetry';
 
 const expired = jwt.isExpired(token); // true/false
 const timeLeft = jwt.timeUntilExpiry(token); // seconds or null`,
       },
       {
         title: 'Get Algorithm',
-        code: `const { jwt } = require('toolmetry');
+        code: `import { jwt } from 'toolmetry';
 
 const algo = jwt.getAlgorithm(token);
 // "HS256"`,
@@ -231,7 +231,7 @@ const algo = jwt.getAlgorithm(token);
     icon: 'Fingerprint',
     category: 'Identity',
     description: 'Generate unique UUIDs instantly with batch creation, validation, and version inspection.',
-    importStatement: `const { uuid } = require('toolmetry');`,
+    importStatement: `import { uuid } from 'toolmetry';`,
     functions: [
       { name: 'uuid.v4', params: '', returns: 'string', description: 'Generate a v4 UUID' },
       { name: 'uuid.v4Short', params: '', returns: 'string', description: 'Generate a v4 UUID without dashes' },
@@ -244,7 +244,7 @@ const algo = jwt.getAlgorithm(token);
     examples: [
       {
         title: 'Generate UUID',
-        code: `const { uuid } = require('toolmetry');
+        code: `import { uuid } from 'toolmetry';
 
 const id = uuid.v4();
 // "550e8400-e29b-41d4-a716-446655440000"
@@ -254,14 +254,14 @@ const short = uuid.v4Short();
       },
       {
         title: 'Batch Generation',
-        code: `const { uuid } = require('toolmetry');
+        code: `import { uuid } from 'toolmetry';
 
 const ids = uuid.v4Batch(5);
 // ["uuid1", "uuid2", "uuid3", "uuid4", "uuid5"]`,
       },
       {
         title: 'Validation & Version',
-        code: `const { uuid } = require('toolmetry');
+        code: `import { uuid } from 'toolmetry';
 
 uuid.isValid('550e8400-e29b-41d4-a716-446655440000'); // true
 uuid.getVersion('550e8400-e29b-41d4-a716-446655440000'); // 4
@@ -275,7 +275,7 @@ uuid.isNil(uuid.nil()); // true`,
     icon: 'LockKeyhole',
     category: 'Security',
     description: 'AES-256-GCM encryption for secure messages with PBKDF2 key derivation.',
-    importStatement: `const { encrypt } = require('toolmetry');`,
+    importStatement: `import { encrypt } from 'toolmetry';`,
     functions: [
       { name: 'aesEncrypt', params: 'plaintext: string, secret: string', returns: 'string', description: 'Encrypt text using AES-256-GCM (Node.js sync)' },
       { name: 'aesDecrypt', params: 'encrypted: string, secret: string', returns: 'string', description: 'Decrypt AES-256-GCM encrypted text (Node.js)' },
@@ -285,7 +285,7 @@ uuid.isNil(uuid.nil()); // true`,
     examples: [
       {
         title: 'Encrypt & Decrypt (Node.js)',
-        code: `const { aesEncrypt, aesDecrypt } = require('toolmetry');
+        code: `import { aesEncrypt, aesDecrypt } from 'toolmetry';
 
 const encrypted = aesEncrypt('Hello, secret!', 'my-password');
 // "iv:authTag:ciphertext" (Base64 parts)
@@ -295,7 +295,7 @@ const decrypted = aesDecrypt(encrypted, 'my-password');
       },
       {
         title: 'Async (Browser)',
-        code: `const { aesEncryptAsync, aesDecryptAsync } = require('toolmetry');
+        code: `import { aesEncryptAsync, aesDecryptAsync } from 'toolmetry';
 
 const encrypted = await aesEncryptAsync('Hello!', 'my-password');
 const decrypted = await aesDecryptAsync(encrypted, 'my-password');
@@ -309,7 +309,7 @@ const decrypted = await aesDecryptAsync(encrypted, 'my-password');
     icon: 'Shuffle',
     category: 'Utility',
     description: 'Generate random strings, numbers, hex, alphanumeric, pick, shuffle, and more.',
-    importStatement: `const { random } = require('toolmetry');`,
+    importStatement: `import { random } from 'toolmetry';`,
     functions: [
       { name: 'randomString', params: 'length?: number, options?: object', returns: 'string', description: 'Generate a random string with options' },
       { name: 'randomInt', params: 'min: number, max: number', returns: 'number', description: 'Random integer between min and max' },
@@ -323,7 +323,7 @@ const decrypted = await aesDecryptAsync(encrypted, 'my-password');
     examples: [
       {
         title: 'Random String',
-        code: `const { randomString } = require('toolmetry');
+        code: `import { randomString } from 'toolmetry';
 
 const str = randomString(16, { lowercase: true, uppercase: true, digits: true });
 // "aB3xY9kL2mN5pQ8"
@@ -333,14 +333,14 @@ const simple = randomString(8, { digits: true, symbols: false });
       },
       {
         title: 'Random Numbers',
-        code: `const { randomInt, randomFloat } = require('toolmetry');
+        code: `import { randomInt, randomFloat } from 'toolmetry';
 
 const int = randomInt(1, 100); // e.g. 42
 const float = randomFloat(0, 1, 4); // e.g. 0.5321`,
       },
       {
         title: 'Hex & Alphanumeric',
-        code: `const { randomHex, randomAlphanumeric } = require('toolmetry');
+        code: `import { randomHex, randomAlphanumeric } from 'toolmetry';
 
 const hex = randomHex(32);
 // "a1b2c3d4e5f6..."
@@ -350,7 +350,7 @@ const alpha = randomAlphanumeric(16);
       },
       {
         title: 'Pick & Shuffle',
-        code: `const { randomPick, randomShuffle } = require('toolmetry');
+        code: `import { randomPick, randomShuffle } from 'toolmetry';
 
 const picked = randomPick(['apple', 'banana', 'cherry']);
 // "banana"
@@ -366,7 +366,7 @@ const shuffled = randomShuffle([1, 2, 3, 4, 5]);
     icon: 'Palette',
     category: 'Design',
     description: 'Convert between HEX, RGB, and HSL with lighten/darken helpers.',
-    importStatement: `const { color } = require('toolmetry');`,
+    importStatement: `import { color } from 'toolmetry';`,
     functions: [
       { name: 'color.hexToRgb', params: 'hex: string', returns: '{ r, g, b }', description: 'Convert HEX to RGB' },
       { name: 'color.rgbToHex', params: 'r: number, g: number, b: number', returns: 'string', description: 'Convert RGB to HEX' },
@@ -382,14 +382,14 @@ const shuffled = randomShuffle([1, 2, 3, 4, 5]);
     examples: [
       {
         title: 'HEX to RGB',
-        code: `const { color } = require('toolmetry');
+        code: `import { color } from 'toolmetry';
 
 const rgb = color.hexToRgb('#3B82F6');
 // { r: 59, g: 130, b: 246 }`,
       },
       {
         title: 'Full Conversion',
-        code: `const { color } = require('toolmetry');
+        code: `import { color } from 'toolmetry';
 
 const all = color.convert('#3B82F6');
 // { hex: "#3b82f6", rgb: {r:59,g:130,b:246},
@@ -399,7 +399,7 @@ const all = color.convert('#3B82F6');
       },
       {
         title: 'Lighten/Darken',
-        code: `const { color } = require('toolmetry');
+        code: `import { color } from 'toolmetry';
 
 const lighter = color.lighten('#3B82F6', 20);
 const darker = color.darken('#3B82F6', 20);`,
@@ -412,7 +412,7 @@ const darker = color.darken('#3B82F6', 20);`,
     icon: 'Code2',
     category: 'Encoding',
     description: 'Encode and decode HTML entities for special characters, named, and numeric.',
-    importStatement: `const { htmlEntity } = require('toolmetry');`,
+    importStatement: `import { htmlEntity } from 'toolmetry';`,
     functions: [
       { name: 'htmlEntity.encode', params: 'input: string', returns: 'string', description: 'Encode HTML special characters' },
       { name: 'htmlEntity.decode', params: 'input: string', returns: 'string', description: 'Decode HTML entities to characters' },
@@ -422,7 +422,7 @@ const darker = color.darken('#3B82F6', 20);`,
     examples: [
       {
         title: 'Encode/Decode',
-        code: `const { htmlEntity } = require('toolmetry');
+        code: `import { htmlEntity } from 'toolmetry';
 
 const encoded = htmlEntity.encode('<div class="test">Hello & World</div>');
 // "&lt;div class=&quot;test&quot;&gt;Hello &amp; World&lt;/div&gt;"
@@ -432,14 +432,14 @@ const decoded = htmlEntity.decode(encoded);
       },
       {
         title: 'Encode All Non-ASCII',
-        code: `const { htmlEntity } = require('toolmetry');
+        code: `import { htmlEntity } from 'toolmetry';
 
 const result = htmlEntity.encodeAll('Cafe\\u0301');
 // "Caf&#233;"`,
       },
       {
         title: 'Encode Specific Characters',
-        code: `const { htmlEntity } = require('toolmetry');
+        code: `import { htmlEntity } from 'toolmetry';
 
 const result = htmlEntity.encodeChars('Hello & "World"', ['&', '"']);
 // 'Hello &amp; &quot;World&quot;'`,
@@ -452,7 +452,7 @@ const result = htmlEntity.encodeChars('Hello & "World"', ['&', '"']);
     icon: 'Binary',
     category: 'Math',
     description: 'Convert between binary, octal, decimal, hex, and custom bases (2-36).',
-    importStatement: `const { numberBase } = require('toolmetry');`,
+    importStatement: `import { numberBase } from 'toolmetry';`,
     functions: [
       { name: 'baseConvert', params: 'value: string, fromBase: number, toBase: number', returns: 'string', description: 'Convert between any bases (2-36)' },
       { name: 'toBinary', params: 'value: string | number', returns: 'string', description: 'Convert decimal to binary' },
@@ -465,7 +465,7 @@ const result = htmlEntity.encodeChars('Hello & "World"', ['&', '"']);
     examples: [
       {
         title: 'Basic Conversion',
-        code: `const { toHex, toBinary } = require('toolmetry');
+        code: `import { toHex, toBinary } from 'toolmetry';
 
 const hex = toHex(255);
 // "FF"
@@ -475,14 +475,14 @@ const binary = toBinary(10);
       },
       {
         title: 'Custom Base Conversion',
-        code: `const { baseConvert } = require('toolmetry');
+        code: `import { baseConvert } from 'toolmetry';
 
 const result = baseConvert('FF', 16, 10);
 // "255"`,
       },
       {
         title: 'Convert to All Bases',
-        code: `const { convertAllBases } = require('toolmetry');
+        code: `import { convertAllBases } from 'toolmetry';
 
 const all = convertAllBases(255);
 // { decimal: "255", binary: "11111111", octal: "377", hex: "FF" }`,
@@ -495,7 +495,7 @@ const all = convertAllBases(255);
     icon: 'Type',
     category: 'Text',
     description: 'Case conversion, slugify, word/char counting, reverse, and more text utilities.',
-    importStatement: `const { text } = require('toolmetry');`,
+    importStatement: `import { text } from 'toolmetry';`,
     functions: [
       { name: 'toCamelCase', params: 'input: string', returns: 'string', description: 'Convert to camelCase' },
       { name: 'toPascalCase', params: 'input: string', returns: 'string', description: 'Convert to PascalCase' },
@@ -514,7 +514,7 @@ const all = convertAllBases(255);
     examples: [
       {
         title: 'Case Conversion',
-        code: `const { toCamelCase, toPascalCase, toSnakeCase, toKebabCase, toConstantCase } = require('toolmetry');
+        code: `import { toCamelCase, toPascalCase, toSnakeCase, toKebabCase, toConstantCase } from 'toolmetry';
 
 toCamelCase('hello world example');  // "helloWorldExample"
 toPascalCase('hello world example'); // "HelloWorldExample"
@@ -524,14 +524,14 @@ toConstantCase('hello world');       // "HELLO_WORLD"`,
       },
       {
         title: 'Slugify',
-        code: `const { slugify } = require('toolmetry');
+        code: `import { slugify } from 'toolmetry';
 
 slugify('My Blog Post Title!');
 // "my-blog-post-title"`,
       },
       {
         title: 'Counting & Truncation',
-        code: `const { wordCount, charCount, truncate } = require('toolmetry');
+        code: `import { wordCount, charCount, truncate } from 'toolmetry';
 
 wordCount('Hello world example'); // 3
 charCount('Hello'); // 5
@@ -545,7 +545,7 @@ truncate('A very long string here', 10); // "A ver..."`,
     icon: 'Braces',
     category: 'Data',
     description: 'Format, minify, validate, flatten, and inspect JSON structures.',
-    importStatement: `const { json } = require('toolmetry');`,
+    importStatement: `import { json } from 'toolmetry';`,
     functions: [
       { name: 'jsonFormat', params: 'input: string, indent?: number', returns: 'string', description: 'Format/prettify JSON' },
       { name: 'jsonMinify', params: 'input: string', returns: 'string', description: 'Minify JSON string' },
@@ -557,7 +557,7 @@ truncate('A very long string here', 10); // "A ver..."`,
     examples: [
       {
         title: 'Format & Minify',
-        code: `const { jsonFormat, jsonMinify } = require('toolmetry');
+        code: `import { jsonFormat, jsonMinify } from 'toolmetry';
 
 const ugly = '{"name":"John","age":30}';
 
@@ -569,14 +569,14 @@ const mini = jsonMinify(ugly);
       },
       {
         title: 'Validate',
-        code: `const { jsonValidate } = require('toolmetry');
+        code: `import { jsonValidate } from 'toolmetry';
 
 const result = jsonValidate('{"valid": true}');
 // { valid: true, error: null, position: null }`,
       },
       {
         title: 'Stats & Flatten',
-        code: `const { jsonStats, jsonFlatten } = require('toolmetry');
+        code: `import { jsonStats, jsonFlatten } from 'toolmetry';
 
 const stats = jsonStats('{"a":1,"b":{"c":2}}');
 // { type: "object", keys: 2, depth: 2, size: 20 }
@@ -592,7 +592,7 @@ const flat = jsonFlatten('{"a":{"b":1}}');
     icon: 'Lock',
     category: 'Security',
     description: 'Generate secure random passwords with customizable options and strength checking.',
-    importStatement: `const { password } = require('toolmetry');`,
+    importStatement: `import { password } from 'toolmetry';`,
     functions: [
       { name: 'passwordGenerate', params: 'options?: PasswordOptions', returns: 'string', description: 'Generate a random password' },
       { name: 'passwordPassphrase', params: 'options?: { words?, separator?, capitalize? }', returns: 'string', description: 'Generate a passphrase' },
@@ -602,7 +602,7 @@ const flat = jsonFlatten('{"a":{"b":1}}');
     examples: [
       {
         title: 'Generate Password',
-        code: `const { passwordGenerate } = require('toolmetry');
+        code: `import { passwordGenerate } from 'toolmetry';
 
 const pwd = passwordGenerate({ length: 20, symbols: true });
 // "aB3$xY9!kL2@mN5#pQ8"
@@ -612,14 +612,14 @@ const simple = passwordGenerate({ length: 8, digits: true, symbols: false });
       },
       {
         title: 'Passphrase',
-        code: `const { passwordPassphrase } = require('toolmetry');
+        code: `import { passwordPassphrase } from 'toolmetry';
 
 const phrase = passwordPassphrase({ words: 4, separator: '-', capitalize: true });
 // "Brave-Cloud-Eagle-Flame"`,
       },
       {
         title: 'Check Strength',
-        code: `const { passwordStrength } = require('toolmetry');
+        code: `import { passwordStrength } from 'toolmetry';
 
 const result = passwordStrength('MyP@ss123');
 // { score: 5, label: "Strong", suggestions: [] }`,
@@ -632,7 +632,7 @@ const result = passwordStrength('MyP@ss123');
     icon: 'Radio',
     category: 'Encoding',
     description: 'Encode and decode Morse code with validation support.',
-    importStatement: `const { morse } = require('toolmetry');`,
+    importStatement: `import { morse } from 'toolmetry';`,
     functions: [
       { name: 'morseEncode', params: 'input: string', returns: 'string', description: 'Encode text to Morse code' },
       { name: 'morseDecode', params: 'input: string', returns: 'string', description: 'Decode Morse code to text' },
@@ -641,7 +641,7 @@ const result = passwordStrength('MyP@ss123');
     examples: [
       {
         title: 'Encode/Decode',
-        code: `const { morseEncode, morseDecode } = require('toolmetry');
+        code: `import { morseEncode, morseDecode } from 'toolmetry';
 
 const encoded = morseEncode('HELLO WORLD');
 // ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
@@ -651,7 +651,7 @@ const decoded = morseDecode(encoded);
       },
       {
         title: 'Validation',
-        code: `const { morseIsValid } = require('toolmetry');
+        code: `import { morseIsValid } from 'toolmetry';
 
 morseIsValid('.... . .-.. .-.. ---'); // true
 morseIsValid('hello'); // false`,
@@ -664,7 +664,7 @@ morseIsValid('hello'); // false`,
     icon: 'Hash',
     category: 'Math',
     description: 'Convert between Arabic numbers and Roman numerals with validation.',
-    importStatement: `const { roman } = require('toolmetry');`,
+    importStatement: `import { roman } from 'toolmetry';`,
     functions: [
       { name: 'romanToRoman', params: 'num: number', returns: 'string', description: 'Convert number to Roman numeral (1-3999)' },
       { name: 'romanFromRoman', params: 'str: string', returns: 'number', description: 'Convert Roman numeral to number' },
@@ -673,21 +673,21 @@ morseIsValid('hello'); // false`,
     examples: [
       {
         title: 'To Roman',
-        code: `const { romanToRoman } = require('toolmetry');
+        code: `import { romanToRoman } from 'toolmetry';
 
 romanToRoman(42);   // "XLII"
 romanToRoman(1999); // "MCMXCIX"`,
       },
       {
         title: 'From Roman',
-        code: `const { romanFromRoman } = require('toolmetry');
+        code: `import { romanFromRoman } from 'toolmetry';
 
 romanFromRoman('XLII');    // 42
 romanFromRoman('MCMXCIX'); // 1999`,
       },
       {
         title: 'Validation',
-        code: `const { romanIsValid } = require('toolmetry');
+        code: `import { romanIsValid } from 'toolmetry';
 
 romanIsValid('XLII'); // true
 romanIsValid('ABC');  // false`,
@@ -700,7 +700,7 @@ romanIsValid('ABC');  // false`,
     icon: 'Clock',
     category: 'Utility',
     description: 'Validate and describe cron expressions with human-readable output.',
-    importStatement: `const { cron } = require('toolmetry');`,
+    importStatement: `import { cron } from 'toolmetry';`,
     functions: [
       { name: 'cronValidate', params: 'expression: string', returns: '{ valid, error, fields }', description: 'Validate a cron expression' },
       { name: 'cronDescribe', params: 'expression: string', returns: 'string', description: 'Get human-readable description' },
@@ -708,14 +708,14 @@ romanIsValid('ABC');  // false`,
     examples: [
       {
         title: 'Validate',
-        code: `const { cronValidate } = require('toolmetry');
+        code: `import { cronValidate } from 'toolmetry';
 
 const result = cronValidate('0 0 * * *');
 // { valid: true, error: null, fields: {...} }`,
       },
       {
         title: 'Describe',
-        code: `const { cronDescribe } = require('toolmetry');
+        code: `import { cronDescribe } from 'toolmetry';
 
 cronDescribe('0 0 * * *');
 // "Cron: 0 0 * * * (at minute 0, at hour 0)"
@@ -731,7 +731,7 @@ cronDescribe('@daily');
     icon: 'GitCompare',
     category: 'Utility',
     description: 'Compare texts line by line and find differences.',
-    importStatement: `const { diff } = require('toolmetry');`,
+    importStatement: `import { diff } from 'toolmetry';`,
     functions: [
       { name: 'diffCheck', params: 'oldText: string, newText: string', returns: '{ lines, stats }', description: 'Compare two strings line by line' },
       { name: 'diffUnified', params: 'oldText: string, newText: string, oldLabel?, newLabel?', returns: 'string', description: 'Generate unified diff string' },
@@ -740,21 +740,21 @@ cronDescribe('@daily');
     examples: [
       {
         title: 'Line-by-Line Diff',
-        code: `const { diffCheck } = require('toolmetry');
+        code: `import { diffCheck } from 'toolmetry';
 
 const result = diffCheck('Hello\\nWorld', 'Hello\\nEarth');
 // { lines: [...], stats: { added: 1, removed: 1, unchanged: 1 } }`,
       },
       {
         title: 'Unified Diff',
-        code: `const { diffUnified } = require('toolmetry');
+        code: `import { diffUnified } from 'toolmetry';
 
 const unified = diffUnified('Hello\\nWorld', 'Hello\\nEarth');
 // "--- original\\n+++ modified\\n  Hello\\n- World\\n+ Earth"`,
       },
       {
         title: 'Quick Comparison',
-        code: `const { diffIsSame } = require('toolmetry');
+        code: `import { diffIsSame } from 'toolmetry';
 
 diffIsSame('hello', 'hello'); // true
 diffIsSame('hello', 'world'); // false`,
@@ -767,7 +767,7 @@ diffIsSame('hello', 'world'); // false`,
     icon: 'AlignLeft',
     category: 'Content',
     description: 'Generate placeholder text for design and development.',
-    importStatement: `const { lorem } = require('toolmetry');`,
+    importStatement: `import { lorem } from 'toolmetry';`,
     functions: [
       { name: 'loremWords', params: 'count?: number', returns: 'string', description: 'Generate lorem ipsum words' },
       { name: 'loremSentences', params: 'count?: number', returns: 'string', description: 'Generate lorem ipsum sentences' },
@@ -776,21 +776,21 @@ diffIsSame('hello', 'world'); // false`,
     examples: [
       {
         title: 'Generate Words',
-        code: `const { loremWords } = require('toolmetry');
+        code: `import { loremWords } from 'toolmetry';
 
 const words = loremWords(10);
 // "lorem ipsum dolor sit amet consectetur adipiscing elit"`,
       },
       {
         title: 'Generate Sentences',
-        code: `const { loremSentences } = require('toolmetry');
+        code: `import { loremSentences } from 'toolmetry';
 
 const sentences = loremSentences(2);
 // Two sentences of lorem ipsum text`,
       },
       {
         title: 'Generate Paragraphs',
-        code: `const { loremParagraphs } = require('toolmetry');
+        code: `import { loremParagraphs } from 'toolmetry';
 
 const paragraphs = loremParagraphs(3);
 // Three paragraphs of lorem ipsum text`,

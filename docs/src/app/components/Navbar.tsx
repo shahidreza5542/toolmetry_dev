@@ -14,16 +14,25 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('npm i toolmetry');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-[#0A0A0A] border-b border-[#1A1A1A]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 h-14">
+        {/* Logo + Name + Version */}
         <Link href="/" className="flex items-center gap-2.5">
           <Image src="/logos/android-chrome-192x192.png" alt="Toolmetry" width={26} height={26} className="rounded" />
           <span className="text-[15px] font-bold text-white">Toolmetry</span>
-          <span className="text-[10px] font-medium text-[#666] bg-[#1A1A1A] px-1.5 py-0.5 rounded">v1.0.4</span>
+          <span className="text-[10px] font-medium text-[#999] bg-[#1A1A1A] px-1.5 py-0.5 rounded">v1.0.5</span>
         </Link>
 
+        {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map(link => {
             const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
@@ -43,12 +52,15 @@ export function Navbar() {
           })}
         </div>
 
+        {/* Desktop Right: npm install + npm link */}
         <div className="hidden md:flex items-center gap-4">
           <button
-            onClick={() => navigator.clipboard.writeText('npm i toolmetry')}
-            className="text-xs font-mono text-[#999] hover:text-white transition-colors"
+            onClick={handleCopy}
+            className="flex items-center gap-2 rounded-md border border-[#1A1A1A] bg-[#111111] px-3 py-1.5 text-xs font-mono text-[#999] hover:text-white hover:border-[#333] transition-colors"
           >
-            $ npm i toolmetry
+            <span className="text-[#666]">$</span>
+            <span>npm i toolmetry</span>
+            <span className="text-[10px] text-[#666]">{copied ? '✓' : '⎘'}</span>
           </button>
           <a
             href="https://www.npmjs.com/package/toolmetry"
@@ -60,6 +72,7 @@ export function Navbar() {
           </a>
         </div>
 
+        {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden p-1.5 rounded-md text-[#999] hover:text-white"
@@ -74,6 +87,7 @@ export function Navbar() {
         </button>
       </div>
 
+      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-[#1A1A1A] px-5 py-3 space-y-1">
           {navLinks.map(link => {
@@ -93,6 +107,12 @@ export function Navbar() {
               </Link>
             );
           })}
+          <button
+            onClick={() => { handleCopy(); setMobileOpen(false); }}
+            className="w-full text-left px-3 py-2 rounded-md text-sm font-mono text-[#999] hover:text-white hover:bg-[#1A1A1A] transition-colors"
+          >
+            $ npm i toolmetry
+          </button>
         </div>
       )}
     </nav>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { tools } from '@/lib/tools-data';
 import { TryItLive } from '@/app/components/TryItLive';
 import { CodeBlock } from '@/app/components/CodeBlock';
@@ -11,7 +11,6 @@ import type { Category } from '@/lib/tools-data';
 export default function PlaygroundPage() {
   const [selectedTool, setSelectedTool] = useState('base64');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'All'>('All');
-  const tool = tools.find(t => t.slug === selectedTool);
 
   const filteredTools = useMemo(() => {
     if (categoryFilter === 'All') return tools;
@@ -19,6 +18,21 @@ export default function PlaygroundPage() {
   }, [categoryFilter]);
 
   const allCategories: (Category | 'All')[] = ['All', ...new Set(tools.map(t => t.category))];
+
+  // Auto-select first tool in filtered category when category changes
+  const handleCategoryChange = (cat: Category | 'All') => {
+    setCategoryFilter(cat);
+    if (cat === 'All') {
+      setSelectedTool('base64');
+    } else {
+      const firstInCat = tools.find(t => t.category === cat);
+      if (firstInCat) {
+        setSelectedTool(firstInCat.slug);
+      }
+    }
+  };
+
+  const tool = tools.find(t => t.slug === selectedTool);
 
   return (
     <>
@@ -35,7 +49,7 @@ export default function PlaygroundPage() {
               {allCategories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setCategoryFilter(cat)}
+                  onClick={() => handleCategoryChange(cat)}
                   className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
                     categoryFilter === cat ? 'bg-[#0C2E76] text-white' : 'bg-[#1A1A1A] text-[#999] hover:text-white'
                   }`}
@@ -89,26 +103,28 @@ export default function PlaygroundPage() {
               <div>
                 <h3 className="text-sm font-semibold text-white mb-2">API Reference</h3>
                 <div className="rounded-lg border border-[#1A1A1A] overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-[#1A1A1A] bg-[#111111]">
-                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Function</th>
-                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Parameters</th>
-                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Returns</th>
-                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tool.functions.map((fn, i) => (
-                        <tr key={i} className="border-b border-[#1A1A1A] last:border-0">
-                          <td className="px-4 py-2.5"><code className="text-xs font-mono font-medium text-white">{fn.name}</code></td>
-                          <td className="px-4 py-2.5"><code className="text-xs font-mono text-[#666]">{fn.params || '—'}</code></td>
-                          <td className="px-4 py-2.5"><code className="text-xs font-mono text-[#666]">{fn.returns}</code></td>
-                          <td className="px-4 py-2.5 text-xs text-[#666]">{fn.description}</td>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm min-w-[600px]">
+                      <thead>
+                        <tr className="border-b border-[#1A1A1A] bg-[#111111]">
+                          <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Function</th>
+                          <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Parameters</th>
+                          <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Returns</th>
+                          <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-[#666]">Description</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {tool.functions.map((fn, i) => (
+                          <tr key={i} className="border-b border-[#1A1A1A] last:border-0">
+                            <td className="px-4 py-2.5"><code className="text-xs font-mono font-medium text-white">{fn.name}</code></td>
+                            <td className="px-4 py-2.5"><code className="text-xs font-mono text-[#666]">{fn.params || '—'}</code></td>
+                            <td className="px-4 py-2.5"><code className="text-xs font-mono text-[#666]">{fn.returns}</code></td>
+                            <td className="px-4 py-2.5 text-xs text-[#666]">{fn.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
