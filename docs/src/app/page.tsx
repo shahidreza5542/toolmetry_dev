@@ -1,197 +1,173 @@
 'use client';
 
 import { useState } from 'react';
-import { Terminal, Copy, Check, Package, Zap, Globe, Shield, ArrowRight, Layers, Sparkles, Code2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { tools } from '@/lib/tools-data';
-import { ToolCard } from '@/app/components/ToolCard';
 import { CodeBlock } from '@/app/components/CodeBlock';
+import { Navbar } from '@/app/components/Navbar';
+import { Footer } from '@/app/components/Footer';
 
 export default function HomePage() {
   const [installCopied, setInstallCopied] = useState(false);
 
-  const handleInstallCopy = () => {
-    navigator.clipboard.writeText('npm i toolmetry');
-    setInstallCopied(true);
-    setTimeout(() => setInstallCopied(false), 2000);
-  };
+  const quickStartCode = `import { base64, url, hash, jwt, uuid, color, random, encrypt } from 'toolmetry';
 
-  const quickStartCode = `const { base64, url, hash, jwt, uuid, color, random, encrypt } = require('toolmetry');
-
-// Base64 encode/decode
+// Base64
 const encoded = base64.encode('Hello, World!');
 const decoded = base64.decode(encoded);
 
-// Generate a UUID
+// UUID
 const id = uuid.v4();
 
-// Convert colors
+// Color convert
 const rgb = color.hexToRgb('#3B82F6');
-// { r: 59, g: 130, b: 246 }
 
 // URL query string
 const qs = url.buildQuery({ name: 'John', page: 1 });
-// "?name=John&page=1"
 
 // Random string
 const token = random.string(32);
-// "aB3xY9kL2mN5pQ8wR7tV4..."
 
 // AES-256 Encrypt
-const encrypted = encrypt.encrypt('Secret msg', 'password');`;
+const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
 
   const stats = [
-    { label: 'Modules', value: '18', icon: Package, description: 'All-in-one toolkit' },
-    { label: 'Dependencies', value: '0', icon: Shield, description: 'Zero bloat' },
-    { label: 'TypeScript', value: 'Full', icon: Code2, description: 'Type-safe APIs' },
-    { label: 'Platforms', value: 'Node + Browser', icon: Globe, description: 'Works everywhere' },
+    { label: 'Modules', value: '18' },
+    { label: 'Dependencies', value: '0' },
+    { label: 'TypeScript', value: 'Full' },
+    { label: 'Platforms', value: 'Node + Browser' },
   ];
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Decorative gradient orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-brand/8 dark:bg-brand/5 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-brand-accent/6 dark:bg-brand-accent/4 blur-3xl" />
-          <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-full bg-brand/4 dark:bg-brand/3 blur-3xl" />
-        </div>
+    <>
+      <Navbar />
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-6xl px-5 py-16 sm:py-24 text-center">
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <Image src="/logos/android-chrome-192x192.png" alt="Toolmetry" width={40} height={40} className="rounded-lg" />
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+                Toolmetry
+              </h1>
+            </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 sm:px-6 lg:px-8 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8 text-sm font-medium gradient-bg text-white shadow-lg shadow-brand/20">
-            <Sparkles size={14} /> v1.0.3 — Now with 18 Modules
-          </div>
+            <p className="text-base text-[#999] max-w-lg mx-auto mb-8 leading-relaxed">
+              18 essential developer tools in one zero-dependency package.
+              Full TypeScript, Node + Browser support.
+            </p>
 
-          {/* Title */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-5">
-            <span className="gradient-text">Toolmetry</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            18 essential developer tools in one zero-dependency package.
-            Full TypeScript, Node + Browser support.
-          </p>
+            {/* Install */}
+            <div className="inline-flex items-center gap-3 rounded-md border border-[#1A1A1A] bg-[#111111] px-4 py-2 mb-8">
+              <code className="text-sm font-mono text-[#999]">$</code>
+              <code className="text-sm font-mono text-white">npm i toolmetry</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText('npm i toolmetry'); setInstallCopied(true); setTimeout(() => setInstallCopied(false), 2000); }}
+                className="text-xs font-medium text-[#666] hover:text-white transition-colors"
+              >
+                {installCopied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
 
-          {/* Install command */}
-          <div className="inline-flex items-center gap-3 rounded-xl px-5 py-3 font-mono text-sm bg-card border border-border shadow-lg glow">
-            <Terminal size={16} className="shrink-0 text-brand" />
-            <span className="text-foreground">$ npm i toolmetry</span>
-            <button
-              onClick={handleInstallCopy}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-brand hover:bg-brand/10 transition-colors ml-2"
-            >
-              {installCopied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
-              {installCopied ? 'Copied!' : 'Copy'}
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/docs"
+                className="inline-flex items-center gap-2 rounded-md bg-[#0C2E76] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1a44a8] transition-colors"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/playground"
+                className="inline-flex items-center gap-2 rounded-md border border-[#1A1A1A] bg-[#111111] px-5 py-2.5 text-sm font-medium text-[#999] hover:text-white hover:bg-[#1A1A1A] transition-colors"
+              >
+                Playground
+              </Link>
+            </div>
           </div>
+        </section>
 
-          {/* CTA Buttons */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-bg shadow-lg shadow-brand/20 transition-all hover:shadow-xl hover:shadow-brand/30 active:scale-[0.97]"
-            >
-              <Zap size={16} /> Get Started
-            </Link>
-            <Link
-              href="/playground"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold border border-border bg-card text-foreground hover:bg-muted hover:border-brand/30 transition-all"
-            >
-              <Globe size={16} /> Playground
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Grid */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
-              <span className="gradient-text">18 Powerful Modules</span>
-            </h2>
-            <p className="text-muted-foreground text-lg">Everything you need, nothing you don&apos;t</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tools.map(tool => (
-              <ToolCard
-                key={tool.slug}
-                slug={tool.slug}
-                name={tool.name}
-                icon={tool.icon}
-                category={tool.category}
-                description={tool.description}
-              />
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline underline-offset-4"
-            >
-              View full documentation <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Start */}
-      <section className="py-20 bg-muted/30 border-y border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">Quick Start</h2>
-            <p className="text-muted-foreground text-lg">Get up and running in under a minute</p>
-          </div>
-          <div className="max-w-3xl mx-auto">
-            <CodeBlock code={quickStartCode} title="Quick Start Example" />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map(stat => (
-              <div key={stat.label} className="text-center p-6 rounded-xl bg-card border border-border hover:border-brand/30 transition-colors">
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-brand/10 dark:bg-brand/15 text-brand dark:text-brand-accent mb-4">
-                  <stat.icon size={22} />
+        {/* Stats */}
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-6xl px-5 py-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {stats.map(stat => (
+                <div key={stat.label} className="text-center">
+                  <div className="text-2xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs font-medium text-[#666] mt-0.5">{stat.label}</div>
                 </div>
-                <div className="text-3xl font-bold gradient-text mb-1">{stat.value}</div>
-                <div className="text-sm font-medium text-foreground mb-0.5">{stat.label}</div>
-                <div className="text-xs text-muted-foreground">{stat.description}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-muted/30 border-y border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Ready to Build?</h2>
-          <p className="text-muted-foreground mb-8 max-w-xl mx-auto text-lg">
-            Start using toolmetry in your project today. Zero dependencies, full TypeScript support, works everywhere.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-bg shadow-lg shadow-brand/20 transition-all hover:shadow-xl hover:shadow-brand/30 active:scale-[0.97]"
-            >
-              <Layers size={16} /> Read the Docs
-            </Link>
-            <a
-              href="https://www.npmjs.com/package/toolmetry"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold border border-border bg-card text-foreground hover:bg-muted hover:border-brand/30 transition-all"
-            >
-              View on npm <ArrowRight size={14} />
-            </a>
+        {/* All Modules */}
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-6xl px-5 py-12">
+            <h2 className="text-2xl font-bold text-white mb-2">All Modules</h2>
+            <p className="text-sm text-[#666] mb-6">Everything you need, nothing you don&apos;t.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {tools.map(tool => (
+                <Link
+                  key={tool.slug}
+                  href={`/docs/${tool.slug}`}
+                  className="group block rounded-lg border border-[#1A1A1A] p-4 hover:border-[#0C2E76] transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="text-sm font-semibold text-white group-hover:text-white transition-colors">
+                      {tool.name}
+                    </h3>
+                    <span className="shrink-0 text-[10px] font-medium text-[#666] bg-[#1A1A1A] px-1.5 py-0.5 rounded">
+                      {tool.category}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#666] leading-relaxed line-clamp-2">
+                    {tool.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+
+        {/* Quick Start */}
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-6xl px-5 py-12">
+            <h2 className="text-2xl font-bold text-white mb-2">Quick Start</h2>
+            <p className="text-sm text-[#666] mb-6">Get up and running in under a minute.</p>
+            <div className="max-w-2xl">
+              <CodeBlock code={quickStartCode} title="Quick Start" />
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section>
+          <div className="mx-auto max-w-6xl px-5 py-12 text-center">
+            <h2 className="text-2xl font-bold text-white mb-3">Ready to Build?</h2>
+            <p className="text-sm text-[#666] mb-6 max-w-md mx-auto">
+              Start using toolmetry in your project today. Zero dependencies, full TypeScript support, works everywhere.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/docs"
+                className="inline-flex items-center gap-2 rounded-md bg-[#0C2E76] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1a44a8] transition-colors"
+              >
+                Read the Docs
+              </Link>
+              <a
+                href="https://www.npmjs.com/package/toolmetry"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-[#1A1A1A] bg-[#111111] px-5 py-2.5 text-sm font-medium text-[#999] hover:text-white hover:bg-[#1A1A1A] transition-colors"
+              >
+                View on npm
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
   );
 }
