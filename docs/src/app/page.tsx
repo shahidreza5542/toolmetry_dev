@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Terminal, Copy, Check, Package, Zap, Globe, Shield, ArrowRight, Layers, Sparkles, Code2, Box, TypeScript } from 'lucide-react';
+import { Terminal, Copy, Check, Package, Zap, Globe, Shield, ArrowRight, Layers, Sparkles, Code2 } from 'lucide-react';
 import Link from 'next/link';
 import { tools } from '@/lib/tools-data';
 import { ToolCard } from '@/app/components/ToolCard';

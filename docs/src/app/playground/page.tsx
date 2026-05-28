@@ -102,7 +102,8 @@ export default function PlaygroundPage() {
           {tool && (
             <div className="space-y-6">
               {/* Tool Info Header */}
-              <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card relative before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:gradient-bg before:rounded-r">
+              <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 gradient-bg rounded-r" />
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 dark:bg-brand/15 text-brand dark:text-brand-accent">
                   {(() => { const Icon = iconMap[tool.icon]; return Icon ? <Icon size={20} /> : null; })()}
                 </div>

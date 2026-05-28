@@ -377,7 +377,8 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header with gradient left border */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30 relative before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:gradient-bg before:rounded-r">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30 relative">
+        <div className="absolute left-0 top-0 bottom-0 w-1 gradient-bg rounded-r" />
         <Play size={14} className="text-brand" />
         <h3 className="text-sm font-semibold text-card-foreground">Try It Live</h3>
         <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-mono text-brand bg-brand/10 dark:bg-brand/15 rounded-full px-2.5 py-1 font-medium">
