@@ -9,42 +9,42 @@ import { CodeBlock } from '@/app/components/CodeBlock';
 const features = [
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
     ),
     title: 'Zero Dependencies',
     description: 'No external packages. No bloat. Just pure, self-contained utility functions that work everywhere without supply chain risks.',
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
     ),
     title: 'Full TypeScript',
     description: 'Complete type definitions for every module. IntelliSense, type checking, and autocompletion out of the box for a seamless DX.',
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
     ),
     title: 'Node + Browser',
     description: 'Works in both Node.js and browser environments. Universal modules with platform-specific optimizations for each runtime.',
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
     ),
     title: '18 Modules',
     description: 'Base64, URL, Hash, JWT, UUID, AES Encrypt, Random, Color, HTML Entity, Number Base, Text, JSON, Password, Morse, Roman, Cron, Diff, Lorem.',
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
     ),
     title: 'Lightweight',
     description: 'Minimal footprint. Import only what you need. Tree-shakeable exports keep your bundle lean and your app fast.',
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
     ),
     title: 'MIT License',
     description: 'Fully open source. Use it in personal projects, commercial software, or anywhere you need it. No restrictions, no worries.',
@@ -156,7 +156,7 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
                 className="inline-flex items-center gap-2 rounded-lg bg-[#0C2E76] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a44a8] transition-colors shadow-lg shadow-[#0C2E76]/20"
               >
                 Get Started
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               </Link>
               <a
                 href="https://www.npmjs.com/package/toolmetry"
@@ -198,23 +198,42 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
         </section>
 
         {/* ── C. ABOUT TOOLMETRY DEV SECTION ── */}
-        <section className="border-b border-[#1A1A1A]">
-          <div className="mx-auto max-w-6xl px-5 py-20">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-5">About Toolmetry</h2>
-              <div className="space-y-4 text-sm text-[#999] leading-relaxed">
-                <p>
-                  Toolmetry was born from a simple frustration: every project needs the same utilities — Base64 encoding, URL parsing, hashing, UUID generation — but each one pulls in a different dependency with its own set of sub-dependencies. Before you know it, your node_modules is bloated and your supply chain is fragile.
+        <section className="border-b border-[#1A1A1A] bg-gradient-to-b from-black to-[#0a0a0a]">
+          <div className="mx-auto max-w-6xl px-5 py-24">
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-4">About Toolmetry</h2>
+                <p className="text-sm text-[#666] leading-relaxed mb-6">
+                  Toolmetry is designed to eliminate dependency chaos in modern development. Instead of installing dozens of small utility libraries, you get everything in one optimized package.
                 </p>
-                <p>
-                  We built Toolmetry to be the single source of truth for common developer operations. Eighteen modules covering encoding, security, identity, design, math, text, data, utility, and content — all implemented from scratch with zero external dependencies. Every function has full TypeScript types, and the entire package is tree-shakeable so you only ship what you use.
-                </p>
-                <p>
-                  Whether you&apos;re building a CLI tool in Node.js, a web app in the browser, or a serverless function, Toolmetry works the same way everywhere. Security-sensitive operations like hashing and encryption automatically use the appropriate platform API — Node&apos;s crypto module on the server, and the Web Crypto API in the browser.
-                </p>
-                <p>
-                  Toolmetry is maintained by the <a href="https://toolmetryai.com" target="_blank" rel="noopener noreferrer" className="text-[#4a7adb] hover:underline">ToolmetryAI</a> team and is open source under the MIT License.
-                </p>
+
+                <div className="space-y-4 text-sm text-[#999] leading-relaxed">
+                  <p>
+                    Built with a focus on performance, security, and developer experience — every module is handcrafted with zero external dependencies.
+                  </p>
+                  <p>
+                    It supports both Node.js and browser environments with automatic runtime adaptation for crypto and system APIs.
+                  </p>
+                  <p>
+                    Maintained by ToolmetryAI and released under MIT License for complete freedom of use.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {[
+                  "Zero Dependency Architecture",
+                  "TypeScript First Design",
+                  "Cross Platform Support",
+                  "Tree Shakeable Modules"
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-xl border border-[#1A1A1A] bg-[#111111] p-4 hover:border-[#0C2E76]/40 transition"
+                  >
+                    <p className="text-sm text-white font-medium">{item}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -222,41 +241,63 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
 
         {/* ── D. QUICK START CODE SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
-          <div className="mx-auto max-w-6xl px-5 py-20">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Quick Start</h2>
-              <p className="text-sm text-[#666] mb-6">Get up and running in under a minute.</p>
-              <CodeBlock code={quickStartCode} title="Quick Start" />
+          <div className="mx-auto max-w-6xl px-5 py-24">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-bold text-white mb-2">Quick Start</h2>
+              <p className="text-sm text-[#666] mb-8">
+                Install and start using Toolmetry in under a minute.
+              </p>
+
+              <div className="rounded-2xl border border-[#1A1A1A] bg-[#111111] overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[#1A1A1A]">
+                  <span className="text-xs text-[#666]">terminal</span>
+                  <span className="text-xs text-[#0C2E76]">npm</span>
+                </div>
+
+                <div className="px-5 py-4 font-mono text-sm text-white">
+                  npm i toolmetry
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <CodeBlock code={quickStartCode} title="Usage Example" />
+              </div>
             </div>
           </div>
         </section>
 
         {/* ── E. FAQ SECTION ── */}
-        <section className="border-b border-[#1A1A1A]">
-          <div className="mx-auto max-w-6xl px-5 py-20">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
-              <p className="text-sm text-[#666] mb-8">Common questions about toolmetry.</p>
+        <section className="border-b border-[#1A1A1A] bg-[#0a0a0a]">
+          <div className="mx-auto max-w-6xl px-5 py-24">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-bold text-white mb-2">Frequently Asked Questions</h2>
+              <p className="text-sm text-[#666] mb-10">
+                Everything you need to know about Toolmetry.
+              </p>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {faqs.map((faq, index) => (
-                  <div key={index} className="rounded-lg border border-[#1A1A1A] overflow-hidden">
+                  <div
+                    key={index}
+                    className="rounded-xl border border-[#1A1A1A] bg-[#111111] overflow-hidden"
+                  >
                     <button
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                      className="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-[#111111] transition-colors"
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#151515] transition"
                     >
-                      <span className="text-sm font-medium text-white">{faq.question}</span>
-                      <svg
-                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        className={`shrink-0 text-[#666] transition-transform duration-200 ${openFaq === index ? 'rotate-180' : ''}`}
-                        strokeLinecap="round" strokeLinejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
+                      <span className="text-sm font-medium text-white text-left">
+                        {faq.question}
+                      </span>
+                      <span className="text-[#666]">
+                        {openFaq === index ? "−" : "+"}
+                      </span>
                     </button>
+
                     {openFaq === index && (
-                      <div className="px-5 pb-4 pt-0">
-                        <p className="text-sm text-[#999] leading-relaxed">{faq.answer}</p>
+                      <div className="px-5 pb-5">
+                        <p className="text-sm text-[#999] leading-relaxed">
+                          {faq.answer}
+                        </p>
                       </div>
                     )}
                   </div>
