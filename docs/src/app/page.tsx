@@ -108,65 +108,41 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
       <Navbar />
       <main className="flex-1">
         {/* ── A. HERO SECTION (full screen with dot grid bg) ── */}
-        <section className="min-h-screen flex items-center justify-center border-b border-[#1A1A1A] relative overflow-hidden">
-          {/* Dot Grid Background */}
-          <div
-            className="absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
-          {/* Subtle radial glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#0C2E76] opacity-[0.04] blur-[120px] pointer-events-none" />
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-5xl px-5 py-20">
+            <h2 className="text-2xl font-bold text-white mb-4">About Toolmetry</h2>
 
-          <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
-            {/* Version badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#1A1A1A] bg-[#111111] px-4 py-1.5 mb-8">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#0C2E76]" />
-              <span className="text-xs font-medium text-[#999]">v1.0.5 — Now Available</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-              18 Developer Tools.<br />
-              One Package.<br />
-              <span className="text-[#4a7adb]">Zero Dependencies.</span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-[#999] max-w-xl mx-auto mb-10 leading-relaxed">
-              Encode, hash, encrypt, generate, convert — all in a single lightweight package with full TypeScript support. Works in Node.js and the browser.
+            <p className="text-sm text-[#999] leading-relaxed mb-5">
+              Toolmetry is a modern developer utility library designed to simplify everyday backend and frontend tasks. Instead of installing multiple small packages for common operations, Toolmetry provides a single, unified toolkit with zero dependencies.
             </p>
 
-            {/* Install Command */}
-            <div className="inline-flex items-center gap-3 rounded-lg border border-[#1A1A1A] bg-[#111111]/80 backdrop-blur-sm px-5 py-3 mb-10">
-              <code className="text-sm font-mono text-[#666]">$</code>
-              <code className="text-sm font-mono text-white">npm i toolmetry</code>
-              <button
-                onClick={() => { navigator.clipboard.writeText('npm i toolmetry'); setInstallCopied(true); setTimeout(() => setInstallCopied(false), 2000); }}
-                className="text-xs font-medium text-[#666] hover:text-white transition-colors px-2 py-1 rounded border border-[#1A1A1A] hover:border-[#333]"
-              >
-                {installCopied ? 'Copied!' : 'Copy'}
-              </button>
+            <p className="text-sm text-[#999] leading-relaxed mb-5">
+              It includes 18 modular tools covering encoding, hashing, authentication, encryption, random generation, text processing, data formatting, and more. Each module is optimized for performance and works seamlessly in both Node.js and browser environments.
+            </p>
+
+            <p className="text-sm text-[#999] leading-relaxed mb-6">
+              Built with TypeScript support and tree-shaking in mind, Toolmetry ensures that you only ship what you actually use — keeping your bundle size minimal and your application fast.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                "Zero External Dependencies",
+                "Full TypeScript Support",
+                "Node + Browser Compatible",
+                "Tree-shakeable Architecture"
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-lg border border-[#1A1A1A] bg-[#111111] px-4 py-3 text-sm text-white"
+                >
+                  {item}
+                </div>
+              ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/docs"
-                className="inline-flex items-center gap-2 rounded-lg bg-[#0C2E76] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a44a8] transition-colors shadow-lg shadow-[#0C2E76]/20"
-              >
-                Get Started
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              </Link>
-              <a
-                href="https://www.npmjs.com/package/toolmetry"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg border border-[#1A1A1A] bg-[#111111]/80 backdrop-blur-sm px-6 py-3 text-sm font-semibold text-[#999] hover:text-white hover:border-[#333] transition-colors"
-              >
-                View on npm
-              </a>
-            </div>
+            <p className="text-xs text-[#666] mt-6">
+              Maintained by ToolmetryAI • MIT Licensed Open Source
+            </p>
           </div>
         </section>
 
