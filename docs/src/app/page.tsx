@@ -198,111 +198,87 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
         </section>
 
         {/* ── C. ABOUT TOOLMETRY DEV SECTION ── */}
-        <section className="border-b border-[#1A1A1A] bg-gradient-to-b from-black to-[#0a0a0a]">
-          <div className="mx-auto max-w-6xl px-5 py-24">
-            <div className="grid lg:grid-cols-2 gap-12 items-start">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-4">About Toolmetry</h2>
-                <p className="text-sm text-[#666] leading-relaxed mb-6">
-                  Toolmetry is designed to eliminate dependency chaos in modern development. Instead of installing dozens of small utility libraries, you get everything in one optimized package.
-                </p>
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-5xl px-5 py-20">
+            <h2 className="text-2xl font-bold text-white mb-4">About Toolmetry</h2>
 
-                <div className="space-y-4 text-sm text-[#999] leading-relaxed">
-                  <p>
-                    Built with a focus on performance, security, and developer experience — every module is handcrafted with zero external dependencies.
-                  </p>
-                  <p>
-                    It supports both Node.js and browser environments with automatic runtime adaptation for crypto and system APIs.
-                  </p>
-                  <p>
-                    Maintained by ToolmetryAI and released under MIT License for complete freedom of use.
-                  </p>
+            <p className="text-sm text-[#999] leading-relaxed mb-6">
+              Toolmetry is a lightweight developer utility library built to remove dependency clutter. Instead of installing multiple small packages, you get everything in one optimized toolkit.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                "Zero Dependencies",
+                "TypeScript Support",
+                "Works in Node + Browser",
+                "Tree-shakeable Modules"
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-lg border border-[#1A1A1A] bg-[#111111] px-4 py-3 text-sm text-white"
+                >
+                  {item}
                 </div>
-              </div>
-
-              <div className="grid gap-4">
-                {[
-                  "Zero Dependency Architecture",
-                  "TypeScript First Design",
-                  "Cross Platform Support",
-                  "Tree Shakeable Modules"
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-xl border border-[#1A1A1A] bg-[#111111] p-4 hover:border-[#0C2E76]/40 transition"
-                  >
-                    <p className="text-sm text-white font-medium">{item}</p>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
+
+            <p className="text-xs text-[#666] mt-6">
+              Maintained by ToolmetryAI • MIT Licensed
+            </p>
           </div>
         </section>
 
         {/* ── D. QUICK START CODE SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
-          <div className="mx-auto max-w-6xl px-5 py-24">
-            <div className="max-w-3xl">
-              <h2 className="text-3xl font-bold text-white mb-2">Quick Start</h2>
-              <p className="text-sm text-[#666] mb-8">
-                Install and start using Toolmetry in under a minute.
-              </p>
+          <div className="mx-auto max-w-5xl px-5 py-20">
+            <h2 className="text-2xl font-bold text-white mb-2">Quick Start</h2>
 
-              <div className="rounded-2xl border border-[#1A1A1A] bg-[#111111] overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-[#1A1A1A]">
-                  <span className="text-xs text-[#666]">terminal</span>
-                  <span className="text-xs text-[#0C2E76]">npm</span>
-                </div>
+            <p className="text-sm text-[#666] mb-6">
+              Install and start using Toolmetry in seconds.
+            </p>
 
-                <div className="px-5 py-4 font-mono text-sm text-white">
-                  npm i toolmetry
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <CodeBlock code={quickStartCode} title="Usage Example" />
-              </div>
+            <div className="rounded-lg border border-[#1A1A1A] bg-[#111111] px-4 py-3 font-mono text-sm text-white mb-6">
+              npm i toolmetry
             </div>
+
+            <CodeBlock code={quickStartCode} title="Example Usage" />
           </div>
         </section>
 
         {/* ── E. FAQ SECTION ── */}
-        <section className="border-b border-[#1A1A1A] bg-[#0a0a0a]">
-          <div className="mx-auto max-w-6xl px-5 py-24">
-            <div className="max-w-3xl">
-              <h2 className="text-3xl font-bold text-white mb-2">Frequently Asked Questions</h2>
-              <p className="text-sm text-[#666] mb-10">
-                Everything you need to know about Toolmetry.
-              </p>
+        <section className="border-b border-[#1A1A1A]">
+          <div className="mx-auto max-w-5xl px-5 py-20">
+            <h2 className="text-2xl font-bold text-white mb-2">FAQ</h2>
 
-              <div className="space-y-3">
-                {faqs.map((faq, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-[#1A1A1A] bg-[#111111] overflow-hidden"
+            <p className="text-sm text-[#666] mb-6">
+              Common questions about Toolmetry.
+            </p>
+
+            <div className="space-y-2">
+              {faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="border border-[#1A1A1A] rounded-lg bg-[#111111]"
+                >
+                  <button
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="w-full flex justify-between items-center px-4 py-3 text-left"
                   >
-                    <button
-                      onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#151515] transition"
-                    >
-                      <span className="text-sm font-medium text-white text-left">
-                        {faq.question}
-                      </span>
-                      <span className="text-[#666]">
-                        {openFaq === index ? "−" : "+"}
-                      </span>
-                    </button>
+                    <span className="text-sm text-white">{faq.question}</span>
+                    <span className="text-[#666]">
+                      {openFaq === index ? "−" : "+"}
+                    </span>
+                  </button>
 
-                    {openFaq === index && (
-                      <div className="px-5 pb-5">
-                        <p className="text-sm text-[#999] leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  {openFaq === index && (
+                    <div className="px-4 pb-3">
+                      <p className="text-sm text-[#999] leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </section>
