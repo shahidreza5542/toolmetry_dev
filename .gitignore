@@ -1,47 +1,68 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 # dependencies
 node_modules
-.pnp
-.pnp.js
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Next.js build output
-.next
-out
-dist
+# testing
+/coverage
 
-# env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# next.js
+/.next/
+/out/
 
-# logs
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+.pnpm-debug.log*
 
-# runtime
-*.pid
-*.seed
-*.pid.lock
+# env files (can opt-in for committing if needed)
+.env*
 
-# coverage
-coverage
-
-# cache
-.cache
+# vercel
 .vercel
-.turbo
 
-# OS files
-.DS_Store
-Thumbs.db
+# toolmetry-dev build artifacts
+toolmetry-dev/docs/.next/
+toolmetry-dev/docs/node_modules/
+toolmetry-dev/docs/out/
+toolmetry-dev/docs/.env*
+toolmetry-work/
+toolmetryai-dev/
+toolmetryai-package/
 
-# TypeScript
+
+# typescript
 *.tsbuildinfo
+next-env.d.ts
+local-*
+.claude
+.z-ai-config
+*.log
+dev.log
+dev.out.log
+test
+prompt
 
-# IDE
-.vscode
-.idea
-package/
+server.log
+# Skills directory
+/skills/
+# Remove old toolmetry-dev from tracking
+toolmetry-dev/
+
+# Uploads
+upload/
