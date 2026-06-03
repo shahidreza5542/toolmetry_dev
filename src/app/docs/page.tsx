@@ -35,19 +35,16 @@ const pwd = password.generate({ length: 20 });`;
 
   return (
     <>
-      {/* Header */}
       <h1 className="text-3xl font-bold text-white mb-2">Documentation</h1>
       <p className="text-sm text-[#666] mb-10 leading-relaxed">
         Everything you need to know about the toolmetry npm package. 18 modules, zero dependencies, full TypeScript.
       </p>
 
-      {/* Getting Started */}
       <section className="mb-10">
         <h2 className="text-lg font-semibold text-white mb-3">Getting Started</h2>
         <CodeBlock code={quickStartCode} title="Quick Start" />
       </section>
 
-      {/* Installation */}
       <section className="mb-10">
         <h2 className="text-lg font-semibold text-white mb-3">Installation</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -58,14 +55,12 @@ const pwd = password.generate({ length: 20 });`;
         </div>
       </section>
 
-      {/* Module Overview */}
       <section className="mb-10">
         <h2 className="text-lg font-semibold text-white mb-3">Module Overview</h2>
         <p className="text-sm text-[#666] mb-4">
           Click on any module to see its full API reference and interactive examples.
         </p>
 
-        {/* Search + Filter */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <div className="flex-1 max-w-xs">
             <input
@@ -103,7 +98,6 @@ const pwd = password.generate({ length: 20 });`;
           </div>
         </div>
 
-        {/* Module List */}
         <div className="space-y-1">
           {filteredTools.map(tool => (
             <Link

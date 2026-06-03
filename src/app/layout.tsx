@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Toolmetry — 18 Developer Tools, Zero Dependencies",
+    default: "Toolmetry — 21 Developer Tools, Zero Dependencies",
     template: "%s | Toolmetry Docs",
   },
   description:
-    "Toolmetry provides 18 essential developer tools — Base64, URL, Hash, JWT, UUID, AES Encrypt, Random, Color, and more — in one zero-dependency npm package with full TypeScript support. Works in Node.js and the browser.",
+    "Toolmetry provides 21 essential developer tools — Base64, URL, Hash, JWT, UUID, AES Encrypt, Random, Color, QR code, Markdown, Timestamp, and more — in one zero-dependency npm package with full TypeScript support. Works in Node.js and the browser.",
   keywords: [
     "toolmetry",
     "developer tools",
@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     "JavaScript",
     "Node.js",
     "browser",
+    "QR code",
+    "markdown",
+    "timestamp",
   ],
   authors: [{ name: "ToolmetryAI", url: "https://toolmetryai.com" }],
   creator: "ToolmetryAI",
@@ -38,9 +41,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://toolmetry-dev.vercel.app",
     siteName: "Toolmetry",
-    title: "Toolmetry — 18 Developer Tools, Zero Dependencies",
+    title: "Toolmetry — 21 Developer Tools, Zero Dependencies",
     description:
-      "18 essential developer tools in one zero-dependency npm package. Full TypeScript, Node.js + Browser support. Encode, hash, encrypt, generate, convert.",
+      "21 essential developer tools in one zero-dependency npm package. Full TypeScript, Node.js + Browser support. Encode, hash, encrypt, generate, convert.",
     images: [
       {
         url: "/logos/android-chrome-192x192.png",
@@ -52,9 +55,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Toolmetry — 18 Developer Tools, Zero Dependencies",
+    title: "Toolmetry — 21 Developer Tools, Zero Dependencies",
     description:
-      "18 essential developer tools in one zero-dependency npm package with full TypeScript support.",
+      "21 essential developer tools in one zero-dependency npm package with full TypeScript support.",
     images: ["/logos/android-chrome-192x192.png"],
   },
   robots: {
@@ -81,9 +84,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="manifest" href="/logos/site.webmanifest" />
-      </head>
       <body className="antialiased">
         <div className="min-h-screen flex flex-col">
           {children}

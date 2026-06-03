@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { tools } from '@/lib/tools-data';
 import { TryItLive } from '@/app/components/TryItLive';
 import { CodeBlock } from '@/app/components/CodeBlock';
@@ -19,7 +19,6 @@ export default function PlaygroundPage() {
 
   const allCategories: (Category | 'All')[] = ['All', ...new Set(tools.map(t => t.category))];
 
-  // Auto-select first tool in filtered category when category changes
   const handleCategoryChange = (cat: Category | 'All') => {
     setCategoryFilter(cat);
     if (cat === 'All') {
@@ -39,11 +38,9 @@ export default function PlaygroundPage() {
       <Navbar />
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-5 py-10">
-          {/* Header */}
           <h1 className="text-2xl font-bold text-white mb-1">Playground</h1>
           <p className="text-sm text-[#666] mb-8">Try any toolmetry module right in your browser.</p>
 
-          {/* Tool selector */}
           <div className="mb-8">
             <div className="flex flex-wrap gap-1 mb-3">
               {allCategories.map(cat => (
@@ -70,10 +67,8 @@ export default function PlaygroundPage() {
             </select>
           </div>
 
-          {/* Tool content */}
           {tool && (
             <div className="space-y-6">
-              {/* Tool header */}
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-lg font-semibold text-white">{tool.name}</h2>
@@ -82,13 +77,11 @@ export default function PlaygroundPage() {
                 <p className="text-sm text-[#666]">{tool.description}</p>
               </div>
 
-              {/* Interactive */}
               <div>
                 <h3 className="text-sm font-semibold text-white mb-2">Interactive</h3>
                 <TryItLive toolSlug={tool.slug} />
               </div>
 
-              {/* Code Reference */}
               <div>
                 <h3 className="text-sm font-semibold text-white mb-2">Code Reference</h3>
                 <div className="space-y-2">
@@ -99,7 +92,6 @@ export default function PlaygroundPage() {
                 </div>
               </div>
 
-              {/* API Reference */}
               <div>
                 <h3 className="text-sm font-semibold text-white mb-2">API Reference</h3>
                 <div className="rounded-lg border border-[#1A1A1A] overflow-hidden">

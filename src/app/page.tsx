@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Navbar } from '@/app/components/Navbar';
 import { Footer } from '@/app/components/Footer';
 import { CodeBlock } from '@/app/components/CodeBlock';
+import { SITE_VERSION } from '@/lib/constants';
 
 const features = [
   {
@@ -32,8 +33,8 @@ const features = [
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
     ),
-    title: '18 Modules',
-    description: 'Base64, URL, Hash, JWT, UUID, AES Encrypt, Random, Color, HTML Entity, Number Base, Text, JSON, Password, Morse, Roman, Cron, Diff, Lorem.',
+    title: '21 Modules',
+    description: 'Base64, URL, Hash, JWT, UUID, AES Encrypt, Random, Color, HTML Entity, Number Base, Text, JSON, Password, Morse, Roman, Cron, Diff, Lorem, QR, Markdown, Timestamp.',
   },
   {
     icon: (
@@ -54,7 +55,7 @@ const features = [
 const faqs = [
   {
     question: 'What is toolmetry?',
-    answer: 'Toolmetry is an npm package that provides 18 essential developer tools in a single, zero-dependency package. It includes utilities for encoding, security, identity, design, math, text processing, and more — all with full TypeScript support.',
+    answer: 'Toolmetry is an npm package that provides 21 essential developer tools in a single, zero-dependency package. It includes utilities for encoding, security, identity, design, math, text processing, and more — all with full TypeScript support.',
   },
   {
     question: 'Is toolmetry free?',
@@ -84,32 +85,24 @@ export default function HomePage() {
 
   const quickStartCode = `import { base64, url, hash, jwt, uuid, color, random, encrypt } from 'toolmetry';
 
-// Base64
 const encoded = base64.encode('Hello, World!');
 const decoded = base64.decode(encoded);
 
-// UUID
 const id = uuid.v4();
 
-// Color convert
 const rgb = color.hexToRgb('#3B82F6');
 
-// URL query string
 const qs = url.buildQuery({ name: 'John', page: 1 });
 
-// Random string
 const token = random.string(32);
 
-// AES-256 Encrypt
 const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
 
   return (
     <>
       <Navbar />
       <main className="flex-1">
-        {/* ── A. HERO SECTION (full screen with dot grid bg) ── */}
         <section className="min-h-screen flex items-center justify-center border-b border-[#1A1A1A] relative overflow-hidden">
-          {/* Dot Grid Background */}
           <div
             className="absolute inset-0 opacity-[0.07]"
             style={{
@@ -117,18 +110,16 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
               backgroundSize: '24px 24px',
             }}
           />
-          {/* Subtle radial glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#0C2E76] opacity-[0.04] blur-[120px] pointer-events-none" />
 
           <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
-            {/* Version badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-[#1A1A1A] bg-[#111111] px-4 py-1.5 mb-8">
               <span className="h-1.5 w-1.5 rounded-full bg-[#0C2E76]" />
-              <span className="text-xs font-medium text-[#999]">v1.0.5 — Now Available</span>
+              <span className="text-xs font-medium text-[#999]">{SITE_VERSION} — Now Available</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-              18 Developer Tools.<br />
+              21 Developer Tools.<br />
               One Package.<br />
               <span className="text-[#4a7adb]">Zero Dependencies.</span>
             </h1>
@@ -137,7 +128,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
               Encode, hash, encrypt, generate, convert — all in a single lightweight package with full TypeScript support. Works in Node.js and the browser.
             </p>
 
-            {/* Install Command */}
             <div className="inline-flex items-center gap-3 rounded-lg border border-[#1A1A1A] bg-[#111111]/80 backdrop-blur-sm px-5 py-3 mb-10">
               <code className="text-sm font-mono text-[#666]">$</code>
               <code className="text-sm font-mono text-white">npm i toolmetry</code>
@@ -149,7 +139,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
               </button>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/docs"
@@ -170,7 +159,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
           </div>
         </section>
 
-        {/* ── B. FEATURES SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
           <div className="mx-auto max-w-6xl px-5 py-20">
             <div className="text-center mb-12">
@@ -197,7 +185,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
           </div>
         </section>
 
-        {/* ── C. ABOUT TOOLMETRY DEV SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
           <div className="mx-auto max-w-5xl px-5 py-20">
             <h2 className="text-2xl font-bold text-white mb-4">About Toolmetry</h2>
@@ -207,7 +194,7 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
             </p>
 
             <p className="text-sm text-[#999] leading-relaxed mb-5">
-              It includes 18 modular tools covering encoding, hashing, authentication, encryption, random generation, text processing, data formatting, and more. Each module is optimized for performance and works seamlessly in both Node.js and browser environments.
+              It includes 21 modular tools covering encoding, hashing, authentication, encryption, random generation, text processing, data formatting, and more. Each module is optimized for performance and works seamlessly in both Node.js and browser environments.
             </p>
 
             <p className="text-sm text-[#999] leading-relaxed mb-6">
@@ -236,7 +223,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
           </div>
         </section>
 
-        {/* ── D. QUICK START CODE SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
           <div className="mx-auto max-w-5xl px-5 py-20">
             <h2 className="text-2xl font-bold text-white mb-2">Quick Start</h2>
@@ -253,7 +239,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
           </div>
         </section>
 
-        {/* ── E. FAQ SECTION ── */}
         <section className="border-b border-[#1A1A1A]">
           <div className="mx-auto max-w-5xl px-5 py-20">
             <h2 className="text-2xl font-bold text-white mb-2">FAQ</h2>
@@ -291,7 +276,6 @@ const encrypted = await encrypt.encryptAsync('Secret msg', 'password');`;
           </div>
         </section>
 
-        {/* ── F. CTA SECTION ── */}
         <section>
           <div className="mx-auto max-w-6xl px-5 py-20 text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Ready to Build?</h2>

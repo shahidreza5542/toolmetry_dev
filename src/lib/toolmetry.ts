@@ -1,20 +1,3 @@
-/**
- * toolmetry — Browser-Compatible Implementation
- *
- * This file provides the exact same API as the `toolmetry` npm package (v1.0.3),
- * but uses Web Crypto API instead of Node.js `require('crypto')`.
- *
- * It works in BOTH browser and Vercel SSR environments.
- *
- * When the package is published to npm, you can switch imports back to:
- *   import { ... } from 'toolmetry';
- *
- * For now, we use:
- *   import { ... } from '@/lib/toolmetry';
- */
-
-// ─── Base64 ──────────────────────────────────────────────────────────────────
-
 export function base64Encode(input: string): string {
   try {
     return btoa(unescape(encodeURIComponent(input)));
@@ -53,8 +36,6 @@ export const base64 = {
   isValid: base64IsValid,
 };
 
-// ─── URL ─────────────────────────────────────────────────────────────────────
-
 export function urlEncode(input: string): string {
   return encodeURIComponent(input);
 }
@@ -87,8 +68,6 @@ export const url = {
   parseQuery: urlParseQuery,
 };
 
-// ─── Hash ────────────────────────────────────────────────────────────────────
-
 export async function hashAsync(input: string, algorithm: string = 'SHA-256'): Promise<string> {
   const algo = algorithm as AlgorithmIdentifier;
   const data = new TextEncoder().encode(input);
@@ -110,8 +89,6 @@ export const hash = {
   hashAsync,
   hashAll,
 };
-
-// ─── JWT ─────────────────────────────────────────────────────────────────────
 
 export function jwtDecode(token: string): { header: any; payload: any; signature: string } {
   const parts = token.split('.');
@@ -139,8 +116,6 @@ export const jwt = {
   isExpired: jwtIsExpired,
   isValidFormat: jwtIsValidFormat,
 };
-
-// ─── UUID ────────────────────────────────────────────────────────────────────
 
 export function uuidV4(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -170,8 +145,6 @@ export const uuid = {
   v4Batch: uuidV4Batch,
   isValid: uuidIsValid,
 };
-
-// ─── AES-256 Encrypt/Decrypt ────────────────────────────────────────────────
 
 export async function aesEncryptAsync(plaintext: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -203,8 +176,6 @@ export const encrypt = {
   encryptAsync: aesEncryptAsync,
   decryptAsync: aesDecryptAsync,
 };
-
-// ─── Random ──────────────────────────────────────────────────────────────────
 
 export function randomString(
   length: number = 16,
@@ -271,8 +242,6 @@ export const random = {
   float: randomFloat,
 };
 
-// ─── Color ───────────────────────────────────────────────────────────────────
-
 export function colorConvert(input: string): Record<string, any> {
   let hex: string, rgb: { r: number; g: number; b: number };
 
@@ -294,7 +263,6 @@ export function colorConvert(input: string): Record<string, any> {
     throw new Error('Unsupported color format. Use HEX (#RRGGBB) or RGB (rgb(r, g, b))');
   }
 
-  // RGB to HSL
   const r1 = rgb.r / 255, g1 = rgb.g / 255, b1 = rgb.b / 255;
   const max = Math.max(r1, g1, b1), min = Math.min(r1, g1, b1);
   const l = (max + min) / 2;
@@ -325,8 +293,6 @@ export const color = {
   convert: colorConvert,
 };
 
-// ─── HTML Entity ─────────────────────────────────────────────────────────────
-
 export function htmlEntityEncode(input: string): string {
   return input.replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] || c
@@ -344,8 +310,6 @@ export const htmlEntity = {
   decode: htmlEntityDecode,
 };
 
-// ─── Number Base ─────────────────────────────────────────────────────────────
-
 export function convertAllBases(value: string | number, fromBase: number = 10): Record<string, string> {
   const num = typeof value === 'number' ? value : parseInt(value, fromBase);
   if (isNaN(num)) throw new Error('Invalid number for base conversion');
@@ -360,8 +324,6 @@ export function convertAllBases(value: string | number, fromBase: number = 10): 
 export const numberBase = {
   convertAll: convertAllBases,
 };
-
-// ─── Text ────────────────────────────────────────────────────────────────────
 
 export function toCamelCase(input: string): string {
   return input
@@ -426,8 +388,6 @@ export const text = {
   reverse,
 };
 
-// ─── JSON ────────────────────────────────────────────────────────────────────
-
 export function jsonFormat(input: string, indent: number = 2): string {
   return JSON.stringify(JSON.parse(input), null, indent);
 }
@@ -451,8 +411,6 @@ export const json = {
   validate: jsonValidate,
 };
 
-// ─── Password ────────────────────────────────────────────────────────────────
-
 export function passwordGenerate(options?: { length?: number; symbols?: boolean; digits?: boolean; uppercase?: boolean; lowercase?: boolean }): string {
   const opts = { length: 16, symbols: true, digits: true, uppercase: true, lowercase: true, ...options };
   let chars = '';
@@ -469,8 +427,6 @@ export function passwordGenerate(options?: { length?: number; symbols?: boolean;
 export const password = {
   generate: passwordGenerate,
 };
-
-// ─── Morse Code ──────────────────────────────────────────────────────────────
 
 const MORSE_MAP: Record<string, string> = {
   A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.',
@@ -505,8 +461,6 @@ export const morse = {
   encode: morseEncode,
   decode: morseDecode,
 };
-
-// ─── Roman Numerals ──────────────────────────────────────────────────────────
 
 const ROMAN_VALUES: [number, string][] = [
   [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
@@ -546,8 +500,6 @@ export const roman = {
   fromRoman: romanFromRoman,
 };
 
-// ─── Cron Validator ──────────────────────────────────────────────────────────
-
 const CRON_ALIASES: Record<string, string> = {
   '@yearly': 'Runs once a year (midnight, January 1st)',
   '@annually': 'Runs once a year (midnight, January 1st)',
@@ -561,7 +513,6 @@ const CRON_ALIASES: Record<string, string> = {
 export function cronValidate(expression: string): { valid: boolean; error: string | null } {
   const trimmed = expression.trim();
 
-  // Handle aliases
   if (trimmed.startsWith('@')) {
     if (CRON_ALIASES[trimmed]) return { valid: true, error: null };
     return { valid: false, error: `Unknown alias: ${trimmed}` };
@@ -581,7 +532,6 @@ export function cronValidate(expression: string): { valid: boolean; error: strin
   for (let i = 0; i < 5; i++) {
     const part = parts[i];
     const range = ranges[i];
-    // Allow *, */n, n, n-m, n,m,o
     if (part === '*') continue;
     if (part.startsWith('*/')) {
       const n = parseInt(part.slice(2));
@@ -639,8 +589,6 @@ export const cron = {
   describe: cronDescribe,
 };
 
-// ─── Diff Checker ────────────────────────────────────────────────────────────
-
 export function diffCheck(oldText: string, newText: string): {
   lines: { type: 'added' | 'removed' | 'unchanged'; content: string }[];
   stats: { added: number; removed: number; unchanged: number };
@@ -678,8 +626,6 @@ export const diff = {
   diff: diffCheck,
 };
 
-// ─── Lorem Ipsum ─────────────────────────────────────────────────────────────
-
 const LOREM_WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum'.split(' ');
 
 export function loremWords(count: number = 10): string {
@@ -711,4 +657,82 @@ export const lorem = {
   words: loremWords,
   sentences: loremSentences,
   paragraphs: loremParagraphs,
+};
+
+export function qrGenerate(text: string): string {
+  const encoded = encodeURIComponent(text);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encoded}&bgcolor=ffffff&color=000000`;
+}
+
+export const qr = {
+  generate: qrGenerate,
+};
+
+export function markdownToHtml(input: string): string {
+  let html = input;
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+  html = html.replace(/^\- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  html = html.replace(/^---$/gm, '<hr/>');
+  html = html.replace(/\n{2,}/g, '</p><p>');
+  html = '<p>' + html + '</p>';
+  html = html.replace(/<p><(h[1-3]|ul|ol|blockquote|hr)/g, '<$1');
+  html = html.replace(/<\/(h[1-3]|ul|ol|blockquote)><\/p>/g, '</$1>');
+  return html;
+}
+
+export function markdownStrip(input: string): string {
+  return input
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/^[>\-\*]\s+/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^---$/gm, '');
+}
+
+export const markdown = {
+  toHtml: markdownToHtml,
+  strip: markdownStrip,
+};
+
+export function timestampNow(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
+export function timestampToDate(ts: number): string {
+  return new Date(ts * 1000).toISOString();
+}
+
+export function timestampFromDateString(dateStr: string): number {
+  return Math.floor(new Date(dateStr).getTime() / 1000);
+}
+
+export function timestampFormat(ts: number, format: string = 'iso'): string {
+  const d = new Date(ts * 1000);
+  switch (format) {
+    case 'iso': return d.toISOString();
+    case 'utc': return d.toUTCString();
+    case 'locale': return d.toLocaleString();
+    case 'date': return d.toISOString().split('T')[0];
+    case 'time': return d.toISOString().split('T')[1].split('.')[0];
+    default: return d.toISOString();
+  }
+}
+
+export const timestamp = {
+  now: timestampNow,
+  toDate: timestampToDate,
+  fromDateString: timestampFromDateString,
+  format: timestampFormat,
 };

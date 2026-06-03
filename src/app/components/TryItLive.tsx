@@ -20,6 +20,9 @@ import {
   cronValidate, cronDescribe,
   diffCheck,
   loremWords, loremSentences, loremParagraphs,
+  qrGenerate,
+  markdownToHtml, markdownStrip,
+  timestampNow, timestampToDate, timestampFromDateString, timestampFormat,
 } from '@/lib/toolmetry';
 
 interface TryItLiveProps {
@@ -153,6 +156,24 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           else result = loremWords(count);
           break;
         }
+        case 'qr': {
+          if (!input.trim()) { result = 'Enter text or URL to generate QR code'; break; }
+          result = qrGenerate(input);
+          break;
+        }
+        case 'markdown': {
+          if (!input.trim()) { result = 'Enter Markdown text'; break; }
+          result = mode === 'strip' ? markdownStrip(input) : markdownToHtml(input);
+          break;
+        }
+        case 'timestamp': {
+          if (mode === 'now') { result = String(timestampNow()); }
+          else if (mode === 'toDate') { const ts = parseInt(input); result = isNaN(ts) ? 'Enter a valid Unix timestamp' : timestampToDate(ts); }
+          else if (mode === 'fromDate') { try { result = String(timestampFromDateString(input)); } catch { result = 'Invalid date string. Use ISO format like 2024-06-03'; } }
+          else if (mode === 'format') { const ts = parseInt(input); result = isNaN(ts) ? 'Enter a valid Unix timestamp' : timestampFormat(ts, 'iso'); }
+          else { result = String(timestampNow()); }
+          break;
+        }
         default:
           result = 'Interactive demo not available for this tool.';
       }
@@ -178,6 +199,8 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
       case 'json': return [{ value: 'format', label: 'Format' }, { value: 'minify', label: 'Minify' }, { value: 'validate', label: 'Validate' }];
       case 'number-base': return [{ value: 'decimal', label: 'From Decimal' }, { value: 'binary', label: 'From Binary' }, { value: 'hex', label: 'From Hex' }, { value: 'octal', label: 'From Octal' }];
       case 'lorem': return [{ value: 'words', label: 'Words' }, { value: 'sentences', label: 'Sentences' }, { value: 'paragraphs', label: 'Paragraphs' }];
+      case 'markdown': return [{ value: 'toHtml', label: 'To HTML' }, { value: 'strip', label: 'Strip' }];
+      case 'timestamp': return [{ value: 'now', label: 'Now' }, { value: 'toDate', label: 'To Date' }, { value: 'fromDate', label: 'From Date' }, { value: 'format', label: 'Format' }];
       default: return [];
     }
   };
@@ -202,6 +225,9 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
       case 'diff': return 'Hello World\n---\nHello Earth';
       case 'lorem': return '5';
       case 'uuid': return '1';
+      case 'qr': return 'https://toolmetryai.com';
+      case 'markdown': return '# Hello **World**\n\nThis is a paragraph with [a link](https://example.com).';
+      case 'timestamp': return mode === 'fromDate' ? '2024-06-03' : String(Math.floor(Date.now() / 1000));
       default: return 'Enter input...';
     }
   };
@@ -279,9 +305,20 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="w-full rounded-md border border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2.5 text-sm font-mono break-all whitespace-pre-wrap max-h-56 overflow-y-auto text-[#ccc]">
-              {output}
-            </pre>
+            {toolSlug === 'qr' && output.startsWith('http') ? (
+              <div className="space-y-3">
+                <div className="flex justify-center p-4 bg-white rounded-lg">
+                  <img src={output} alt="Generated QR Code" className="w-48 h-48 sm:w-56 sm:h-56" />
+                </div>
+                <pre className="w-full rounded-md border border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2.5 text-sm font-mono break-all whitespace-pre-wrap max-h-20 overflow-y-auto text-[#ccc]">
+                  {output}
+                </pre>
+              </div>
+            ) : (
+              <pre className="w-full rounded-md border border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2.5 text-sm font-mono break-all whitespace-pre-wrap max-h-56 overflow-y-auto text-[#ccc]">
+                {output}
+              </pre>
+            )}
           </div>
         )}
       </div>

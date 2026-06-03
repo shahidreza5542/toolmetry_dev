@@ -6,6 +6,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { tools, categories, getToolsByCategory } from '@/lib/tools-data';
 import type { Category } from '@/lib/tools-data';
+import { SITE_VERSION } from '@/lib/constants';
 
 export function DocsSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
@@ -24,14 +25,12 @@ export function DocsSidebar({ onClose }: { onClose?: () => void }) {
 
   return (
     <aside className="h-full flex flex-col bg-[#0A0A0A]">
-      {/* Logo Header */}
       <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#1A1A1A] shrink-0">
         <Image src="/logos/android-chrome-192x192.png" alt="Toolmetry" width={22} height={22} className="rounded" />
         <Link href="/" className="text-sm font-bold text-white hover:opacity-80 transition-opacity" onClick={onClose}>
           Toolmetry
         </Link>
-        <span className="text-[9px] font-medium text-[#666] bg-[#1A1A1A] px-1.5 py-0.5 rounded">v1.0.5</span>
-        {/* Mobile close button */}
+        <span className="text-[9px] font-medium text-[#666] bg-[#1A1A1A] px-1.5 py-0.5 rounded">{SITE_VERSION}</span>
         {onClose && (
           <button onClick={onClose} className="ml-auto p-1 rounded text-[#666] hover:text-white transition-colors" aria-label="Close sidebar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -41,9 +40,7 @@ export function DocsSidebar({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {/* Scrollable Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-        {/* Getting Started */}
         <div>
           <Link
             href="/docs"
@@ -61,7 +58,6 @@ export function DocsSidebar({ onClose }: { onClose?: () => void }) {
           </Link>
         </div>
 
-        {/* Modules by Category */}
         <div>
           <h3 className="px-3 mb-2 text-[10px] font-semibold text-[#666] uppercase tracking-widest">Modules</h3>
           <div className="space-y-0.5">
@@ -113,7 +109,6 @@ export function DocsSidebar({ onClose }: { onClose?: () => void }) {
         </div>
       </nav>
 
-      {/* Bottom: npm */}
       <div className="shrink-0 px-4 py-3 border-t border-[#1A1A1A]">
         <a
           href="https://www.npmjs.com/package/toolmetry"

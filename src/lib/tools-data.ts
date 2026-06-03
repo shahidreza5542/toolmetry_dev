@@ -1,10 +1,11 @@
 import {
   FileCode, Link, Shield, KeyRound, Fingerprint, Palette,
   Code2, Binary, Type, Braces, Lock, Radio, Hash,
-  Clock, GitCompare, AlignLeft, LockKeyhole, Shuffle
+  Clock, GitCompare, AlignLeft, LockKeyhole, Shuffle,
+  QrCode, FileText, Timer
 } from 'lucide-react';
 
-export type Category = 'Encoding' | 'Security' | 'Identity' | 'Design' | 'Math' | 'Text' | 'Data' | 'Utility' | 'Content';
+export type Category = 'Encoding' | 'Security' | 'Identity' | 'Design' | 'Math' | 'Text' | 'Data' | 'Utility' | 'Content' | 'Conversion';
 
 export interface ToolFunction {
   name: string;
@@ -25,7 +26,7 @@ export interface ToolInfo {
 }
 
 export const categories: Category[] = [
-  'Encoding', 'Security', 'Identity', 'Design', 'Math', 'Text', 'Data', 'Utility', 'Content'
+  'Encoding', 'Security', 'Identity', 'Design', 'Math', 'Text', 'Data', 'Utility', 'Content', 'Conversion'
 ];
 
 export const categoryColors: Record<Category, string> = {
@@ -38,6 +39,7 @@ export const categoryColors: Record<Category, string> = {
   Data: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
   Utility: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
   Content: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+  Conversion: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
 };
 
 export const tools: ToolInfo[] = [
@@ -797,6 +799,105 @@ const paragraphs = loremParagraphs(3);
       },
     ],
   },
+  {
+    slug: 'qr',
+    name: 'QR Code Generator',
+    icon: 'QrCode',
+    category: 'Utility',
+    description: 'Generate QR codes from any text or URL instantly. Free, no dependencies, works in the browser.',
+    importStatement: `import { qr } from 'toolmetry';`,
+    functions: [
+      { name: 'qr.generate', params: 'text: string', returns: 'string', description: 'Generate a QR code image URL from text' },
+    ],
+    examples: [
+      {
+        title: 'Generate QR Code',
+        code: `import { qr } from 'toolmetry';
+
+const qrUrl = qr.generate('https://toolmetryai.com');
+// Returns QR code image URL`,
+      },
+      {
+        title: 'Generate from Text',
+        code: `import { qr } from 'toolmetry';
+
+const qrUrl = qr.generate('Hello, World!');
+// Returns QR code image URL`,
+      },
+    ],
+  },
+  {
+    slug: 'markdown',
+    name: 'Markdown Converter',
+    icon: 'FileText',
+    category: 'Text',
+    description: 'Convert Markdown to HTML or strip Markdown syntax. Parse headings, bold, links, lists, and more.',
+    importStatement: `import { markdown } from 'toolmetry';`,
+    functions: [
+      { name: 'markdown.toHtml', params: 'input: string', returns: 'string', description: 'Convert Markdown to HTML' },
+      { name: 'markdown.strip', params: 'input: string', returns: 'string', description: 'Strip Markdown syntax to plain text' },
+    ],
+    examples: [
+      {
+        title: 'Markdown to HTML',
+        code: `import { markdown } from 'toolmetry';
+
+const html = markdown.toHtml('# Hello **World**');
+// "<h1>Hello <strong>World</strong></h1>"`,
+      },
+      {
+        title: 'Strip Markdown',
+        code: `import { markdown } from 'toolmetry';
+
+const plain = markdown.strip('# Hello **World**');
+// "Hello World"`,
+      },
+    ],
+  },
+  {
+    slug: 'timestamp',
+    name: 'Timestamp Converter',
+    icon: 'Timer',
+    category: 'Conversion',
+    description: 'Convert between Unix timestamps and human-readable dates. Get current timestamp, format, and parse dates.',
+    importStatement: `import { timestamp } from 'toolmetry';`,
+    functions: [
+      { name: 'timestamp.now', params: '', returns: 'number', description: 'Get current Unix timestamp in seconds' },
+      { name: 'timestamp.toDate', params: 'ts: number', returns: 'string', description: 'Convert Unix timestamp to ISO date string' },
+      { name: 'timestamp.fromDateString', params: 'dateStr: string', returns: 'number', description: 'Convert date string to Unix timestamp' },
+      { name: 'timestamp.format', params: 'ts: number, format?: string', returns: 'string', description: 'Format timestamp (iso, utc, locale, date, time)' },
+    ],
+    examples: [
+      {
+        title: 'Current Timestamp',
+        code: `import { timestamp } from 'toolmetry';
+
+const now = timestamp.now();
+// 1717400000`,
+      },
+      {
+        title: 'Timestamp to Date',
+        code: `import { timestamp } from 'toolmetry';
+
+const date = timestamp.toDate(1717400000);
+// "2024-06-03T06:13:20.000Z"`,
+      },
+      {
+        title: 'Date to Timestamp',
+        code: `import { timestamp } from 'toolmetry';
+
+const ts = timestamp.fromDateString('2024-06-03');
+// 1717372800`,
+      },
+      {
+        title: 'Format Timestamp',
+        code: `import { timestamp } from 'toolmetry';
+
+const utc = timestamp.format(1717400000, 'utc');
+// "Mon, 03 Jun 2024 06:13:20 GMT"`,
+      },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolInfo | undefined {
@@ -826,4 +927,7 @@ export const iconMap: Record<string, React.ComponentType<{ size?: number; classN
   AlignLeft,
   LockKeyhole,
   Shuffle,
+  QrCode,
+  FileText,
+  Timer,
 };

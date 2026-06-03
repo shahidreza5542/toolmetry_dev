@@ -12,26 +12,20 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     <>
       <Navbar />
       <div className="flex-1 flex min-h-0">
-        {/* Desktop Sidebar */}
         <div className="hidden md:block w-[260px] shrink-0 border-r border-[#1A1A1A] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
           <DocsSidebar />
         </div>
 
-        {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div className="md:hidden fixed inset-0 z-50 flex">
-            {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-            {/* Drawer */}
             <div className="relative w-[280px] max-w-[80vw] bg-[#0A0A0A] h-full border-r border-[#1A1A1A]">
               <DocsSidebar onClose={() => setSidebarOpen(false)} />
             </div>
           </div>
         )}
 
-        {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Mobile sidebar toggle */}
           <div className="md:hidden border-b border-[#1A1A1A] px-5 py-2 flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}

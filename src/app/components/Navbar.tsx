@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
+import { SITE_VERSION } from '@/lib/constants';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -25,14 +26,12 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#0A0A0A] border-b border-[#1A1A1A]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 h-14">
-        {/* Logo + Name + Version */}
         <Link href="/" className="flex items-center gap-2.5">
           <Image src="/logos/android-chrome-192x192.png" alt="Toolmetry" width={26} height={26} className="rounded" />
           <span className="text-[15px] font-bold text-white">Toolmetry</span>
-          <span className="text-[10px] font-medium text-[#999] bg-[#1A1A1A] px-1.5 py-0.5 rounded">v1.0.5</span>
+          <span className="text-[10px] font-medium text-[#999] bg-[#1A1A1A] px-1.5 py-0.5 rounded">{SITE_VERSION}</span>
         </Link>
 
-        {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map(link => {
             const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
@@ -52,7 +51,6 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Desktop Right: npm install + npm link */}
         <div className="hidden md:flex items-center gap-4">
           <button
             onClick={handleCopy}
@@ -72,7 +70,6 @@ export function Navbar() {
           </a>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden p-1.5 rounded-md text-[#999] hover:text-white"
@@ -87,7 +84,6 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-[#1A1A1A] px-5 py-3 space-y-1">
           {navLinks.map(link => {
