@@ -2,7 +2,7 @@ import { tools } from '@/lib/tools-data';
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://toolmetry-dev.vercel.app';
+  const baseUrl = 'https://dev.toolmetry.pro';
 
   const toolPages = tools.map(tool => ({
     url: `${baseUrl}/docs/${tool.slug}`,
@@ -16,13 +16,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 1,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/docs`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.9,
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/playground`,

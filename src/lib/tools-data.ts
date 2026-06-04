@@ -815,10 +815,10 @@ const paragraphs = loremParagraphs(3);
         title: 'Generate QR Code',
         code: `import { qr } from 'toolmetry';
 
-const qrUrl = qr.generate('https://toolmetryai.com');
+const qrUrl = qr.generate('https://toolmetry.pro');
 // Returns QR code image URL
 
-const qrLarge = qr.generate('https://toolmetryai.com', 512);
+const qrLarge = qr.generate('https://toolmetry.pro', 512);
 // Returns a larger 512x512 QR code`,
       },
       {

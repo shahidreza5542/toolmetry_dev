@@ -232,7 +232,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
       case 'diff': return 'Hello World\n---\nHello Earth';
       case 'lorem': return '5';
       case 'uuid': return '1';
-      case 'qr': return mode === 'decode' ? 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=Hello' : 'https://toolmetryai.com';
+      case 'qr': return mode === 'decode' ? 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=Hello' : 'https://toolmetry.pro';
       case 'markdown': return '# Hello **World**\n\nThis is a paragraph with [a link](https://example.com).';
       case 'timestamp': return mode === 'fromDate' ? '2024-06-03' : String(Math.floor(Date.now() / 1000));
       default: return 'Enter input...';

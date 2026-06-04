@@ -43,7 +43,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li><a href="https://www.npmjs.com/package/toolmetry" target="_blank" rel="noopener noreferrer" className="text-xs text-[#666] hover:text-white transition-colors">npm</a></li>
               <li><a href="https://github.com/toolmetryai/toolmetry-npm" target="_blank" rel="noopener noreferrer" className="text-xs text-[#666] hover:text-white transition-colors">GitHub</a></li>
-              <li><a href="https://toolmetryai.com" target="_blank" rel="noopener noreferrer" className="text-xs text-[#666] hover:text-white transition-colors">ToolmetryAI</a></li>
+              <li><a href="https://toolmetry.pro" target="_blank" rel="noopener noreferrer" className="text-xs text-[#666] hover:text-white transition-colors">ToolmetryAI</a></li>
             </ul>
           </div>
         </div>

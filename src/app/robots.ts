@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://toolmetry-dev.vercel.app/sitemap.xml',
+    sitemap: 'https://dev.toolmetry.pro/sitemap.xml',
   };
 }

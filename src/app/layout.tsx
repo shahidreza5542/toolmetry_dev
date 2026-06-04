@@ -29,17 +29,17 @@ export const metadata: Metadata = {
     "markdown",
     "timestamp",
   ],
-  authors: [{ name: "ToolmetryAI", url: "https://toolmetryai.com" }],
+  authors: [{ name: "ToolmetryAI", url: "https://toolmetry.pro" }],
   creator: "ToolmetryAI",
   publisher: "ToolmetryAI",
-  metadataBase: new URL("https://toolmetry-dev.vercel.app"),
+  metadataBase: new URL("https://dev.toolmetry.pro"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://toolmetry-dev.vercel.app",
+    url: "https://dev.toolmetry.pro",
     siteName: "Toolmetry",
     title: "Toolmetry — 21 Developer Tools, Zero Dependencies",
     description:
