@@ -1,12 +1,11 @@
 {
   "name": "toolmetry-dev-portal",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint ."
+    "start": "next start"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",
@@ -16,10 +15,9 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

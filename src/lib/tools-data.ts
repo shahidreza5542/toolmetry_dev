@@ -801,13 +801,14 @@ const paragraphs = loremParagraphs(3);
   },
   {
     slug: 'qr',
-    name: 'QR Code Generator',
+    name: 'QR Code Generator & Decoder',
     icon: 'QrCode',
     category: 'Utility',
-    description: 'Generate QR codes from any text or URL instantly. Free, no dependencies, works in the browser.',
+    description: 'Generate QR codes from any text or URL, and decode QR code images back to text. Free, no dependencies, works in the browser.',
     importStatement: `import { qr } from 'toolmetry';`,
     functions: [
-      { name: 'qr.generate', params: 'text: string', returns: 'string', description: 'Generate a QR code image URL from text' },
+      { name: 'qr.generate', params: 'text: string, size?: number', returns: 'string', description: 'Generate a QR code image URL from text' },
+      { name: 'qr.decode', params: 'imageUrl: string', returns: 'Promise<string>', description: 'Decode a QR code image URL back to text' },
     ],
     examples: [
       {
@@ -815,7 +816,17 @@ const paragraphs = loremParagraphs(3);
         code: `import { qr } from 'toolmetry';
 
 const qrUrl = qr.generate('https://toolmetryai.com');
-// Returns QR code image URL`,
+// Returns QR code image URL
+
+const qrLarge = qr.generate('https://toolmetryai.com', 512);
+// Returns a larger 512x512 QR code`,
+      },
+      {
+        title: 'Decode QR Code',
+        code: `import { qr } from 'toolmetry';
+
+const decoded = await qr.decode('https://example.com/qr-image.png');
+// Returns the text/URL encoded in the QR code`,
       },
       {
         title: 'Generate from Text',

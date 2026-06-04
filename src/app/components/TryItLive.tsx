@@ -20,7 +20,7 @@ import {
   cronValidate, cronDescribe,
   diffCheck,
   loremWords, loremSentences, loremParagraphs,
-  qrGenerate,
+  qrGenerate, qrDecode,
   markdownToHtml, markdownStrip,
   timestampNow, timestampToDate, timestampFromDateString, timestampFormat,
 } from '@/lib/toolmetry';
@@ -157,8 +157,14 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
           break;
         }
         case 'qr': {
-          if (!input.trim()) { result = 'Enter text or URL to generate QR code'; break; }
-          result = qrGenerate(input);
+          if (mode === 'decode') {
+            if (!input.trim()) { result = 'Enter a QR code image URL to decode'; break; }
+            try { result = await qrDecode(input.trim()); }
+            catch (e) { result = `Error: ${e instanceof Error ? e.message : 'Could not decode QR code'}`; }
+          } else {
+            if (!input.trim()) { result = 'Enter text or URL to generate QR code'; break; }
+            result = qrGenerate(input);
+          }
           break;
         }
         case 'markdown': {
@@ -200,6 +206,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
       case 'number-base': return [{ value: 'decimal', label: 'From Decimal' }, { value: 'binary', label: 'From Binary' }, { value: 'hex', label: 'From Hex' }, { value: 'octal', label: 'From Octal' }];
       case 'lorem': return [{ value: 'words', label: 'Words' }, { value: 'sentences', label: 'Sentences' }, { value: 'paragraphs', label: 'Paragraphs' }];
       case 'markdown': return [{ value: 'toHtml', label: 'To HTML' }, { value: 'strip', label: 'Strip' }];
+      case 'qr': return [{ value: 'generate', label: 'Generate' }, { value: 'decode', label: 'Decode' }];
       case 'timestamp': return [{ value: 'now', label: 'Now' }, { value: 'toDate', label: 'To Date' }, { value: 'fromDate', label: 'From Date' }, { value: 'format', label: 'Format' }];
       default: return [];
     }
@@ -225,7 +232,7 @@ export function TryItLive({ toolSlug }: TryItLiveProps) {
       case 'diff': return 'Hello World\n---\nHello Earth';
       case 'lorem': return '5';
       case 'uuid': return '1';
-      case 'qr': return 'https://toolmetryai.com';
+      case 'qr': return mode === 'decode' ? 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=Hello' : 'https://toolmetryai.com';
       case 'markdown': return '# Hello **World**\n\nThis is a paragraph with [a link](https://example.com).';
       case 'timestamp': return mode === 'fromDate' ? '2024-06-03' : String(Math.floor(Date.now() / 1000));
       default: return 'Enter input...';

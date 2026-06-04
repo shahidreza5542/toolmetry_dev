@@ -659,13 +659,25 @@ export const lorem = {
   paragraphs: loremParagraphs,
 };
 
-export function qrGenerate(text: string): string {
+export function qrGenerate(text: string, size: number = 256): string {
   const encoded = encodeURIComponent(text);
-  return `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encoded}&bgcolor=ffffff&color=000000`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=000000`;
+}
+
+export async function qrDecode(imageUrl: string): Promise<string> {
+  const response = await fetch(`https://api.qrserver.com/v1/read-qr-code/?fileurl=${encodeURIComponent(imageUrl)}`);
+  const data = await response.json();
+  if (Array.isArray(data) && data.length > 0 && data[0].symbol && data[0].symbol[0]) {
+    const result = data[0].symbol[0];
+    if (result.error) throw new Error(result.error);
+    return result.data || '';
+  }
+  throw new Error('Could not decode QR code');
 }
 
 export const qr = {
   generate: qrGenerate,
+  decode: qrDecode,
 };
 
 export function markdownToHtml(input: string): string {
